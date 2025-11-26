@@ -5,8 +5,9 @@ import { useAuth } from '../context/AuthContext';
 import { useLanguage } from '../context/LanguageContext';
 import { ToonCard } from '../components/ToonCard';
 import { ToonButton } from '../components/ToonButton';
+import { ToonModal } from '../components/ToonModal';
 import { generateBlogContent } from '../services/geminiService';
-import { Wand2, Save, Lock, Upload, X, Eye, Edit3 } from 'lucide-react';
+import { Wand2, Save, Lock, Upload, X, Eye, Edit3, Loader2 } from 'lucide-react';
 import { BlogPost } from '../types';
 import ReactMarkdown from 'react-markdown';
 
@@ -23,6 +24,7 @@ export const CreatePost: React.FC = () => {
     const [coverImage, setCoverImage] = useState<string>('');
     const [isGenerating, setIsGenerating] = useState(false);
     const [activeTab, setActiveTab] = useState<'write' | 'preview'>('write');
+    const [isOverwriteModalOpen, setIsOverwriteModalOpen] = useState(false);
 
     const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -63,9 +65,19 @@ export const CreatePost: React.FC = () => {
         }
     };
 
-    const handleAIWrite = async () => {
-        if (!title) return alert('Please enter a title first!');
+    const startAIWrite = () => {
+        if (!title) return alert(t('create.error_no_title'));
 
+        // If there is already content, ask for confirmation
+        if (content.trim().length > 0) {
+            setIsOverwriteModalOpen(true);
+        } else {
+            performAIWrite();
+        }
+    };
+
+    const performAIWrite = async () => {
+        setIsOverwriteModalOpen(false);
         setIsGenerating(true);
         setActiveTab('write'); // Switch back to write mode to see result
         try {
@@ -189,7 +201,7 @@ export const CreatePost: React.FC = () => {
                             <ToonButton
                                 type="button"
                                 variant="secondary"
-                                onClick={handleAIWrite}
+                                onClick={startAIWrite}
                                 isLoading={isGenerating}
                                 className="text-sm py-1 px-3"
                             >
@@ -224,8 +236,18 @@ export const CreatePost: React.FC = () => {
                         <div className={`
               w-full border-4 border-black rounded-xl rounded-tl-none p-4 min-h-[300px] 
               ${activeTab === 'write' ? 'bg-white' : 'bg-white'}
-              focus-within:shadow-toon transition-shadow
+              focus-within:shadow-toon transition-shadow relative
             `}>
+                            {/* Generating Overlay */}
+                            {isGenerating && (
+                                <div className="absolute inset-0 z-20 bg-white/60 backdrop-blur-[2px] flex items-center justify-center rounded-xl">
+                                    <div className="flex flex-col items-center p-6 bg-white border-4 border-black rounded-xl shadow-toon animate-in zoom-in">
+                                        <Loader2 className="w-12 h-12 animate-spin text-toon-purple mb-3"/>
+                                        <span className="font-black text-lg animate-pulse">{t('create.generating')}</span>
+                                    </div>
+                                </div>
+                            )}
+
                             {activeTab === 'write' ? (
                                 <textarea
                                     value={content}
@@ -233,6 +255,7 @@ export const CreatePost: React.FC = () => {
                                     rows={12}
                                     className="w-full h-full font-mono text-base focus:outline-none resize-none bg-transparent"
                                     placeholder="Write something amazing using Markdown..."
+                                    disabled={isGenerating}
                                 />
                             ) : (
                                 <div className="prose prose-lg prose-headings:font-black prose-p:font-medium prose-a:text-toon-blue prose-img:border-4 prose-img:border-black prose-img:rounded-xl max-w-none font-sans overflow-y-auto max-h-[500px]">
@@ -263,6 +286,26 @@ export const CreatePost: React.FC = () => {
 
                 </form>
             </ToonCard>
+
+            {/* Overwrite Confirmation Modal */}
+            <ToonModal
+                isOpen={isOverwriteModalOpen}
+                onClose={() => setIsOverwriteModalOpen(false)}
+                title={t('modal.overwrite_title')}
+                variant="danger"
+                footer={
+                    <>
+                        <ToonButton variant="ghost" onClick={() => setIsOverwriteModalOpen(false)}>
+                            {t('modal.cancel')}
+                        </ToonButton>
+                        <ToonButton onClick={performAIWrite}>
+                            {t('modal.confirm')}
+                        </ToonButton>
+                    </>
+                }
+            >
+                <p>{t('modal.overwrite_desc')}</p>
+            </ToonModal>
         </div>
     );
 };
