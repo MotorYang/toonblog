@@ -4,7 +4,7 @@
 
 **一个充满活力、由 AI 驱动的新野兽派风格个人博客。**
 
-[🇺🇸 English Documentation](./README.md)
+[English Documentation](./README.md)
 
 </div>
 

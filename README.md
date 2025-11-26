@@ -4,7 +4,7 @@
 
 **A vibrant, AI-powered personal blog with a Neo-Brutalist soul.**
 
-[🇨🇳 中文文档 (Chinese Documentation)](./README_ZH.md)
+[中文文档 (Chinese Documentation)](./README_ZH.md)
 
 </div>
 
