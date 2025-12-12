@@ -1,6 +1,5 @@
 import React, { useEffect } from 'react';
 import { X, AlertTriangle, Info } from 'lucide-react';
-import { ToonButton } from './ToonButton';
 
 interface ToonModalProps {
   isOpen: boolean;
