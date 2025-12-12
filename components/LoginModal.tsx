@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { ToonButton } from './ToonButton';
 import { useLanguage } from '../context/LanguageContext';
-import { X, KeyRound, Lock } from 'lucide-react';
+import { X, KeyRound, Lock, User } from 'lucide-react';
 
 interface LoginModalProps {
   isOpen: boolean;
@@ -64,14 +64,12 @@ export const LoginModal: React.FC<LoginModalProps> = ({ isOpen, onClose, onLogin
             <KeyRound size={32} />
           </div>
           <h2 className="text-3xl font-black">{t('login.title')}</h2>
-          <p className="font-bold text-gray-500 text-sm mt-1">
-            Admin: <code className="bg-gray-100 px-1 rounded border border-gray-300">admin</code> / <code className="bg-gray-100 px-1 rounded border border-gray-300">123456</code>
-          </p>
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
-            <label className="block font-black text-lg mb-2">{t('login.username')}</label>
+            <label className="block font-black text-lg mb-2 flex items-center gap-2">
+                <User size={18} /> {t('login.username')}</label>
             <input
               type="text"
               value={username}

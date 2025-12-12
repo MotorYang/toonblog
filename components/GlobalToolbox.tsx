@@ -6,9 +6,9 @@ import { useLanguage } from '../context/LanguageContext';
 
 // Mock Playlist
 const PLAYLIST = [
-  { title: "Lo-Fi Beats", artist: "Chill Guy", url: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3" },
-  { title: "Upbeat Funk", artist: "Groove Bot", url: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-2.mp3" },
-  { title: "Synthwave", artist: "Neon Rider", url: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-3.mp3" },
+  { title: "红色高跟鞋", artist: "蔡健雅", url: "https://m801.music.126.net/20251212113049/f545fd340fdb02f0416f965322118765/jdymusic/obj/wo3DlMOGwrbDjj7DisKw/28558895606/8835/a4cc/1782/f00d82e063edf24a844599abe6e0f65c.flac?vuutv=ux2GJY2oZkpjZ+zC5GnmUpzsNkbcIWO1aiCBEHjx+p109nShwJ7tlQaNhss9uMdab/st3aOJvGn7N1BixK/HYuV8krt06XDwtsmyUM87TQ8=" },
+  { title: "起风了", artist: "买辣椒也用券", url: "https://m701.music.126.net/20251212113315/be741489ad7391d4f66fee5c712f7d09/jdymusic/obj/wo3DlMOGwrbDjj7DisKw/28481714396/6c87/85e4/ab54/32f5945c4e22ee3bc275544dd3bcc66c.flac?vuutv=DiM23pTxYAEsndGw2S+y+P5TR4LYRZ45dZZPDdxLcOVJmBx+HOHhZCNQicFDZOrXn/e3PPrNyTkCXYdSAtJwzyj/RAKhvrZhjRmXCbFu2FE=" },
+  { title: "孤岛", artist: "赵二", url: "https://m7.music.126.net/20251212113402/4fd1aaeaaa919297aa07b7ffe5b5ba1c/ymusic/obj/w5zDlMODwrDDiGjCn8Ky/14050766620/914d/cbac/c7af/6be58fd37a4343ab31be1cd93e6ffe5e.flac?vuutv=Nxjuht/v8Ib06AobS7l6R65Q0aqqirTB/NdnIEPzbiXR15yMocLxH0o/pDodGnjkJCqp0rHQ5zMHHRUjejtvXuS3XhgF1fKAdOAk3BYV+u0=" },
 ];
 
 export const GlobalToolbox: React.FC = () => {

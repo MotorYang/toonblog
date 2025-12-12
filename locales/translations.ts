@@ -4,6 +4,7 @@ export const translations = {
         'nav.home': 'Home',
         'nav.create': 'Create',
         'nav.dashboard': 'Dashboard',
+        'nav.settings': 'Settings',
         'nav.login': 'Login',
         'nav.logout': 'Logout',
         // Home
@@ -76,6 +77,7 @@ export const translations = {
         'nav.home': '首页',
         'nav.create': '创作',
         'nav.dashboard': '看板',
+        'nav.settings': '设置',
         'nav.login': '登录',
         'nav.logout': '登出',
         // Home

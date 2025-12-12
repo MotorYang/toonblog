@@ -69,7 +69,7 @@ export const Dashboard: React.FC = () => {
     <div className="space-y-6 md:space-y-8 pb-12">
       <div className="text-center mb-4 md:mb-8">
         <h1 className="text-3xl md:text-4xl font-black flex items-center justify-center gap-3">
-          <BarChart3 size={32} className="text-toon-blue md:w-10 md:h-10" /> 
+          <BarChart3 size={32} className="text-toon-red md:w-10 md:h-10" />
           {t('dash.title')}
         </h1>
         <p className="font-bold text-gray-600">{t('dash.subtitle')}</p>
