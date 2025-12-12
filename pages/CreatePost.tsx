@@ -123,7 +123,9 @@ export const CreatePost: React.FC = () => {
   return (
     <div className="max-w-2xl mx-auto">
       <div className="mb-6 text-center">
-        <h1 className="text-4xl font-black text-black">{t('create.title')}</h1>
+        <h1 className="text-3xl md:text-4xl font-black flex items-center justify-center gap-3">
+          {t('create.title')}
+        </h1>
         <p className="font-bold text-gray-600">{t('create.subtitle')}</p>
       </div>
 

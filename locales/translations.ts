@@ -59,6 +59,9 @@ export const translations = {
     'dash.table_title': 'Title',
     'dash.table_views': 'Views',
     'dash.no_views': 'No views yet. Go read something!',
+    // Settings
+    'settings.title': 'Settings',
+    'settings.music': 'Music',
     // Login
     'login.title': 'Who Goes There?',
     'login.username': 'Username',
@@ -132,6 +135,9 @@ export const translations = {
     'dash.table_title': '标题',
     'dash.table_views': '浏览量',
     'dash.no_views': '暂无浏览。快去读点什么！',
+    // Settings
+    'settings.title': '设置',
+    'settings.music': '音乐',
     // Login
     'login.title': '来者何人？',
     'login.username': '用户名',
