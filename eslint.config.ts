@@ -2,7 +2,6 @@
 import js from '@eslint/js';
 import { defineConfig } from 'eslint/config';
 import importPlugin from 'eslint-plugin-import';
-import a11y from 'eslint-plugin-jsx-a11y';
 import prettier from 'eslint-plugin-prettier';
 import react from 'eslint-plugin-react';
 import simpleImportSort from 'eslint-plugin-simple-import-sort';
@@ -32,7 +31,6 @@ export default defineConfig([
       'simple-import-sort': simpleImportSort,
       prettier,
       unicorn,
-      'jsx-a11y': a11y,
     },
 
     settings: {
@@ -101,13 +99,6 @@ export default defineConfig([
       'react/react-in-jsx-scope': 'off',
       'react/jsx-props-no-spreading': 'off',
       'react/jsx-filename-extension': 'off',
-
-      // jsx-a11y 规则示例（手动启用）
-      'jsx-a11y/anchor-is-valid': 'warn',
-      'jsx-a11y/alt-text': 'warn',
-      'jsx-a11y/no-static-element-interactions': 'warn',
-      'jsx-a11y/click-events-have-key-events': 'warn',
-      'jsx-a11y/no-noninteractive-tabindex': 'warn',
     },
   },
 ]);

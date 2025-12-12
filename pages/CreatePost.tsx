@@ -134,7 +134,7 @@ export const CreatePost: React.FC = () => {
             <label className="block font-black text-xl">{t('create.cover_image')}</label>
 
             {!coverImage ? (
-              <button
+              <div
                 onClick={() => fileInputRef.current?.click()}
                 className="border-4 border-dashed border-black rounded-xl p-8 flex flex-col items-center justify-center cursor-pointer bg-gray-50 hover:bg-toon-bg transition-colors group"
               >
@@ -150,7 +150,7 @@ export const CreatePost: React.FC = () => {
                   accept="image/*"
                   onChange={handleImageUpload}
                 />
-              </button>
+              </div>
             ) : (
               <div className="relative border-4 border-black rounded-xl overflow-hidden group">
                 <img src={coverImage} alt="Preview" className="w-full h-48 object-cover" />

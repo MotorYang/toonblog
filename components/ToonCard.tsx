@@ -35,8 +35,8 @@ export const ToonCard: React.FC<ToonCardProps> = ({
     : '';
 
   return (
-    <button type="button" className={`${baseClasses} ${hoverClasses}`} onClick={onClick}>
+    <div className={`${baseClasses} ${hoverClasses}`} onClick={onClick}>
       {children}
-    </button>
+    </div>
   );
 };

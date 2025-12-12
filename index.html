@@ -7,7 +7,7 @@
     <script src="https://cdn.tailwindcss.com?plugins=typography"></script>
     <!-- Fonts: Fredoka (Cartoon), Orbitron (Cyberpunk), Noto Serif SC (Chinese) -->
     <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@300;400;600;700&family=Orbitron:wght@400;700;900&family=Noto+Serif+SC:wght@400;700&display=swap" rel="stylesheet">
-    
+
     <style>
       /* --- CSS Variables Strategy --- */
       :root {
@@ -19,7 +19,7 @@
         --font-main: 'Fredoka', sans-serif;
         --color-bg-page: #FFF8E1;
         --color-bg-card: #FFFFFF;
-        
+
         /* Semantics mapped to old 'toon' names */
         --color-primary: #FFD93D;   /* toon-yellow */
         --color-secondary: #6BCB77; /* toon-blue (mapped to green in UI) */
@@ -28,14 +28,14 @@
         --color-border: #000000;
         --color-text: #1a1a1a;
         --color-text-on-brand: #000000; /* Black text on bright buttons */
-        
+
         --border-width: 4px;
         --radius: 0.75rem; /* rounded-xl */
-        
+
         /* Hard Shadow */
         --shadow-normal: 4px 4px 0px 0px #000000;
         --shadow-hover: 2px 2px 0px 0px #000000;
-        
+
         /* Background Pattern */
         --bg-image: url("data:image/svg+xml,%3Csvg width='100' height='100' viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' stroke='%23000' stroke-width='2' stroke-linecap='round' stroke-linejoin='round' opacity='0.07'%3E%3Cpath d='M20 20 C20 10 40 10 40 20 V45 L35 40 L30 45 L25 40 L20 45 Z' /%3E%3Ccircle cx='26' cy='25' r='2' fill='%23000' /%3E%3Ccircle cx='34' cy='25' r='2' fill='%23000' /%3E%3Ccircle cx='70' cy='70' r='15' /%3E%3Cpath d='M65 72 Q70 78 75 72' /%3E%3Ccircle cx='66' cy='66' r='2' fill='%23000' /%3E%3Ccircle cx='74' cy='66' r='2' fill='%23000' /%3E%3Cpath d='M75 15 L78 22 L86 22 L80 28 L82 36 L75 31 L68 36 L70 28 L64 22 L72 22 Z' /%3E%3Cpath d='M15 70 L25 80 M25 70 L15 80' /%3E%3Ccircle cx='45' cy='50' r='3' /%3E%3C/g%3E%3C/svg%3E");
       }
@@ -45,7 +45,7 @@
         --font-main: 'Orbitron', sans-serif;
         --color-bg-page: #050510;
         --color-bg-card: #0a0a1a;
-        
+
         --color-primary: #FEE715;   /* Neon Yellow */
         --color-secondary: #00F3FF; /* Cyan */
         --color-accent: #FF0055;    /* Neon Red */
@@ -53,14 +53,14 @@
         --color-border: #00F3FF;    /* Cyan Borders */
         --color-text: #E0E0E0;      /* Light Text */
         --color-text-on-brand: #000000; /* Black text on neon buttons for readability */
-        
+
         --border-width: 2px;
         --radius: 2px; /* Sharp corners */
-        
+
         /* Glow Shadow */
         --shadow-normal: 0px 0px 10px 0px rgba(0, 243, 255, 0.6);
         --shadow-hover: 0px 0px 20px 0px rgba(0, 243, 255, 0.9);
-        
+
         /* Grid Pattern */
         --bg-image: linear-gradient(rgba(0, 243, 255, 0.1) 1px, transparent 1px), linear-gradient(90deg, rgba(0, 243, 255, 0.1) 1px, transparent 1px);
         --bg-size: 40px 40px;
@@ -71,7 +71,7 @@
         --font-main: 'Noto Serif SC', serif;
         --color-bg-page: #F3F3E7;   /* Rice Paper */
         --color-bg-card: #FCFAF2;
-        
+
         --color-primary: #E8C3B9;   /* Pale Blush */
         --color-secondary: #8E9E82; /* Bamboo Green */
         --color-accent: #BF242A;    /* Cinnabar Red */
@@ -79,10 +79,10 @@
         --color-border: #5D513C;    /* Ink Border */
         --color-text: #2B2B2B;      /* Ink Black */
         --color-text-on-brand: #2B2B2B; /* Ink text on pale backgrounds */
-        
+
         --border-width: 1px;
         --radius: 4px;
-        
+
         /* Soft Ink Spread Shadow */
         --shadow-normal: 4px 4px 15px -4px rgba(43, 43, 43, 0.3);
         --shadow-hover: 2px 2px 8px -2px rgba(43, 43, 43, 0.4);
@@ -96,7 +96,7 @@
         background-image: var(--bg-image);
         background-size: var(--bg-size, auto);
         color: var(--color-text);
-        font-family: var(--font-main);
+        font-family: var(--font-main),serif;
         transition: background-color 0.5s ease, color 0.5s ease;
       }
     </style>
@@ -118,7 +118,7 @@
               'toon-bg': 'var(--color-bg-page)',
               // Add generic mappings for white/black to adapt to themes
               'white': 'var(--color-bg-card)',
-              'black': 'var(--color-border)', 
+              'black': 'var(--color-border)',
               'gray-900': 'var(--color-text)',
               'toon-ink': 'var(--color-text-on-brand)', // New explicit ink color for colored backgrounds
             },
