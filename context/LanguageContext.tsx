@@ -1,13 +1,14 @@
 import React, { createContext, useContext, useState } from 'react';
-import { Language, LanguageContextType } from '../types';
+
 import { translations } from '../locales/translations';
+import { Language, LanguageContextType } from '../types';
 
 const LanguageContext = createContext<LanguageContextType | undefined>(undefined);
 
 export const LanguageProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [language, setLanguageState] = useState<Language>(() => {
     const saved = localStorage.getItem('app-language');
-    return (saved === 'zh' || saved === 'en') ? saved : 'en';
+    return saved === 'zh' || saved === 'en' ? saved : 'zh';
   });
 
   const setLanguage = (lang: Language) => {

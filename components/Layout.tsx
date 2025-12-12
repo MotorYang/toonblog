@@ -1,12 +1,13 @@
+import { BarChart3, Ghost, Home, LogIn, LogOut, PenTool, Settings } from 'lucide-react';
 import React, { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { PenTool, Home, Ghost, LogIn, LogOut, BarChart3 } from 'lucide-react';
+
 import { useAuth } from '../context/AuthContext';
 import { useLanguage } from '../context/LanguageContext';
+import { GlobalToolbox } from './GlobalToolbox';
+import { LanguageSelector } from './LanguageSelector';
 import { LoginModal } from './LoginModal';
 import { ThemeSelector } from './ThemeSelector';
-import { LanguageSelector } from './LanguageSelector';
-import { GlobalToolbox } from './GlobalToolbox';
 
 export const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const location = useLocation();
@@ -21,22 +22,23 @@ export const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) =>
   const inactiveClass = 'bg-white text-gray-900 hover:bg-gray-50';
 
   const activeClassAdmin = 'bg-toon-blue text-toon-ink shadow-toon-hover';
-  const activeClassDashboard = 'bg-toon-red text-white shadow-toon-hover';
+  const activeClassDashboard = 'bg-toon-red text-toon-ink shadow-toon-hover';
+  const activeClassSettings = 'bg-toon-purple text-toon-ink shadow-toon-hover';
 
   return (
     <div className="min-h-screen flex flex-col font-sans transition-colors duration-300">
-      
       <header className="sticky top-0 z-40 p-2 md:p-4">
         <div className="max-w-4xl mx-auto bg-white border-2 md:border-4 border-black rounded-2xl shadow-toon px-3 py-2 md:px-6 md:py-4 flex flex-wrap gap-2 md:gap-4 items-center justify-between relative transition-all duration-300">
-          
           {/* Logo */}
           <Link to="/" className="flex items-center gap-2 group mr-auto">
             <div className="bg-toon-purple p-1.5 md:p-2 border-2 border-black rounded-lg group-hover:rotate-12 transition-transform">
               <Ghost className="w-5 h-5 md:w-6 md:h-6 text-white" />
             </div>
-            <span className="text-xl md:text-2xl font-black tracking-tighter hidden sm:inline text-gray-900">ToonBlog</span>
+            <span className="text-xl md:text-2xl font-black tracking-tighter hidden sm:inline text-gray-900">
+              ToonBlog
+            </span>
           </Link>
-          
+
           {/* Compact Nav Controls */}
           <div className="flex items-center gap-2">
             <LanguageSelector />
@@ -48,18 +50,18 @@ export const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) =>
           {/* Navigation Links */}
           <div className="flex items-center gap-2">
             <Link to="/">
-              <button 
+              <button
                 className={`p-2 border-2 border-black rounded-lg transition-all ${isActive('/') ? activeClass : inactiveClass}`}
                 title={t('nav.home')}
               >
                 <Home className="w-5 h-5 md:w-6 md:h-6" />
               </button>
             </Link>
-            
+
             {isAdmin && (
               <>
                 <Link to="/create">
-                  <button 
+                  <button
                     className={`p-2 border-2 border-black rounded-lg transition-all ${isActive('/create') ? activeClassAdmin : inactiveClass}`}
                     title={t('nav.create')}
                   >
@@ -67,11 +69,19 @@ export const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) =>
                   </button>
                 </Link>
                 <Link to="/dashboard">
-                  <button 
+                  <button
                     className={`p-2 border-2 border-black rounded-lg transition-all ${isActive('/dashboard') ? activeClassDashboard : inactiveClass}`}
                     title={t('nav.dashboard')}
                   >
                     <BarChart3 className="w-5 h-5 md:w-6 md:h-6" />
+                  </button>
+                </Link>
+                <Link to="/settings">
+                  <button
+                    className={`p-2 border-2 border-black rounded-lg transition-all ${isActive('/settings') ? activeClassSettings : inactiveClass}`}
+                    title={t('nav.settings')}
+                  >
+                    <Settings className="w-5 h-5 md:w-6 md:h-6" />
                   </button>
                 </Link>
               </>
@@ -80,16 +90,16 @@ export const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) =>
             <div className="w-[2px] h-6 md:h-8 bg-black hidden sm:block"></div>
 
             {user ? (
-               <button 
+              <button
                 onClick={logout}
                 className="flex items-center gap-2 px-2 md:px-3 py-1.5 md:py-2 border-2 border-black rounded-lg bg-gray-100 hover:bg-red-100 transition-colors font-bold text-xs md:text-sm text-gray-900"
                 title={t('nav.logout')}
-               >
-                 <LogOut className="w-4 h-4" />
-                 <span className="hidden sm:inline">{user}</span>
-               </button>
+              >
+                <LogOut className="w-4 h-4" />
+                <span className="hidden sm:inline">{user}</span>
+              </button>
             ) : (
-              <button 
+              <button
                 onClick={() => setIsLoginOpen(true)}
                 className="flex items-center gap-2 px-2 md:px-3 py-1.5 md:py-2 border-2 border-black rounded-lg bg-black text-white hover:bg-gray-800 transition-colors font-bold text-xs md:text-sm"
               >
@@ -113,12 +123,8 @@ export const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) =>
         </div>
       </footer>
 
-      <LoginModal 
-        isOpen={isLoginOpen} 
-        onClose={() => setIsLoginOpen(false)} 
-        onLogin={login} 
-      />
-      
+      <LoginModal isOpen={isLoginOpen} onClose={() => setIsLoginOpen(false)} onLogin={login} />
+
       <GlobalToolbox />
     </div>
   );

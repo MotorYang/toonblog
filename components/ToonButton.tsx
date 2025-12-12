@@ -1,17 +1,17 @@
-import React from 'react';
 import { Loader2 } from 'lucide-react';
+import React from 'react';
 
 interface ToonButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
   variant?: 'primary' | 'secondary' | 'danger' | 'ghost';
   isLoading?: boolean;
 }
 
-export const ToonButton: React.FC<ToonButtonProps> = ({ 
-  children, 
-  variant = 'primary', 
+export const ToonButton: React.FC<ToonButtonProps> = ({
+  children,
+  variant = 'primary',
   isLoading = false,
   className = '',
-  ...props 
+  ...props
 }) => {
   const variants = {
     primary: 'bg-toon-yellow text-toon-ink hover:bg-yellow-400',

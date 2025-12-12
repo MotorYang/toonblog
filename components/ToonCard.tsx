@@ -8,12 +8,12 @@ interface ToonCardProps {
   onClick?: () => void;
 }
 
-export const ToonCard: React.FC<ToonCardProps> = ({ 
-  children, 
-  className = '', 
+export const ToonCard: React.FC<ToonCardProps> = ({
+  children,
+  className = '',
   color = 'white',
   hoverEffect = false,
-  onClick
+  onClick,
 }) => {
   const bgColors = {
     white: 'bg-white text-gray-900', // Default theme text on white/dark card
@@ -30,16 +30,13 @@ export const ToonCard: React.FC<ToonCardProps> = ({
     ${className}
   `;
 
-  const hoverClasses = hoverEffect 
-    ? 'hover:translate-x-[4px] hover:translate-y-[4px] hover:shadow-none cursor-pointer' 
+  const hoverClasses = hoverEffect
+    ? 'hover:translate-x-[4px] hover:translate-y-[4px] hover:shadow-none cursor-pointer'
     : '';
 
   return (
-    <div 
-      className={`${baseClasses} ${hoverClasses}`}
-      onClick={onClick}
-    >
+    <button type="button" className={`${baseClasses} ${hoverClasses}`} onClick={onClick}>
       {children}
-    </div>
+    </button>
   );
 };

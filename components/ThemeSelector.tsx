@@ -1,6 +1,7 @@
+import { ScrollText, Smile, Zap } from 'lucide-react';
 import React from 'react';
+
 import { useTheme } from '../context/ThemeContext';
-import { Smile, Zap, ScrollText } from 'lucide-react';
 import { Theme } from '../types';
 
 export const ThemeSelector: React.FC = () => {
@@ -15,7 +16,7 @@ export const ThemeSelector: React.FC = () => {
   const icons = {
     cartoon: <Smile size={20} />,
     cyberpunk: <Zap size={20} />,
-    chinese: <ScrollText size={20} />
+    chinese: <ScrollText size={20} />,
   };
 
   return (

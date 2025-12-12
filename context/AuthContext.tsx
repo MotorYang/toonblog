@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useState } from 'react';
-import { AuthContextType } from '../types';
+
 import { api } from '../services/api';
+import { AuthContextType } from '../types';
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
@@ -16,7 +17,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       setUser(result.user);
       setIsAdmin(result.isAdmin);
     } catch (error) {
-      console.error("Login failed", error);
+      console.error('Login failed', error);
       throw error;
     } finally {
       setIsLoading(false);

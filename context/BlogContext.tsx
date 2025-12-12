@@ -1,6 +1,7 @@
-import React, { createContext, useContext, useState, useEffect } from 'react';
-import { BlogPost, BlogContextType } from '../types';
+import React, { createContext, useContext, useEffect, useState } from 'react';
+
 import { api } from '../services/api';
+import { BlogContextType, BlogPost } from '../types';
 
 const BlogContext = createContext<BlogContextType | undefined>(undefined);
 
@@ -16,7 +17,7 @@ export const BlogProvider: React.FC<{ children: React.ReactNode }> = ({ children
         const data = await api.posts.getAll();
         setPosts(data);
       } catch (error) {
-        console.error("Failed to fetch posts", error);
+        console.error('Failed to fetch posts', error);
       } finally {
         setIsLoading(false);
       }
@@ -31,7 +32,7 @@ export const BlogProvider: React.FC<{ children: React.ReactNode }> = ({ children
       const newPost = await api.posts.create(post);
       setPosts((prev) => [newPost, ...prev]);
     } catch (error) {
-      console.error("Failed to create post", error);
+      console.error('Failed to create post', error);
       throw error;
     }
   };
@@ -41,7 +42,7 @@ export const BlogProvider: React.FC<{ children: React.ReactNode }> = ({ children
       await api.posts.delete(id);
       setPosts((prev) => prev.filter((p) => p.id !== id));
     } catch (error) {
-      console.error("Failed to delete post", error);
+      console.error('Failed to delete post', error);
       throw error;
     }
   };
@@ -53,18 +54,18 @@ export const BlogProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const incrementViews = async (id: string) => {
     try {
       const newViewCount = await api.posts.incrementViews(id);
-      setPosts((prev) => 
-        prev.map(post => 
-          post.id === id ? { ...post, views: newViewCount } : post
-        )
+      setPosts((prev) =>
+        prev.map((post) => (post.id === id ? { ...post, views: newViewCount } : post)),
       );
     } catch (error) {
-      console.error("Failed to increment views", error);
+      console.error('Failed to increment views', error);
     }
   };
 
   return (
-    <BlogContext.Provider value={{ posts, isLoading, addPost, deletePost, getPost, incrementViews }}>
+    <BlogContext.Provider
+      value={{ posts, isLoading, addPost, deletePost, getPost, incrementViews }}
+    >
       {children}
     </BlogContext.Provider>
   );

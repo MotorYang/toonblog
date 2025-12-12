@@ -4,7 +4,8 @@ export const INITIAL_POSTS: BlogPost[] = [
   {
     id: '1',
     title: 'Why I Love Coding in Pajamas',
-    excerpt: 'The ultimate guide to comfort-driven development and why strict dress codes are overrated.',
+    excerpt:
+      'The ultimate guide to comfort-driven development and why strict dress codes are overrated.',
     content: `
       Let's face it: productivity peaks when you are comfortable. 
       
@@ -23,7 +24,7 @@ export const INITIAL_POSTS: BlogPost[] = [
     category: 'Lifestyle',
     imageUrl: 'https://picsum.photos/800/400?random=1',
     tags: ['Coding', 'Humor', 'WFH'],
-    views: 1205
+    views: 1205,
   },
   {
     id: '2',
@@ -49,7 +50,7 @@ export const INITIAL_POSTS: BlogPost[] = [
     category: 'Tech',
     imageUrl: 'https://picsum.photos/800/400?random=2',
     tags: ['React', 'Vue', 'Frontend'],
-    views: 892
+    views: 892,
   },
   {
     id: '3',
@@ -67,6 +68,6 @@ export const INITIAL_POSTS: BlogPost[] = [
     category: 'Food',
     imageUrl: 'https://picsum.photos/800/400?random=3',
     tags: ['Food', 'Health', 'Tips'],
-    views: 430
-  }
+    views: 430,
+  },
 ];

@@ -1,7 +1,8 @@
+import { KeyRound, Lock, User, X } from 'lucide-react';
 import React, { useState } from 'react';
-import { ToonButton } from './ToonButton';
+
 import { useLanguage } from '../context/LanguageContext';
-import { X, KeyRound, Lock } from 'lucide-react';
+import { ToonButton } from './ToonButton';
 
 interface LoginModalProps {
   isOpen: boolean;
@@ -35,7 +36,7 @@ export const LoginModal: React.FC<LoginModalProps> = ({ isOpen, onClose, onLogin
       setPassword('');
       setError('');
       onClose();
-    } catch (err: any) {
+    } catch {
       setError(t('login.error_failed'));
     } finally {
       setIsLoading(false);
@@ -52,7 +53,7 @@ export const LoginModal: React.FC<LoginModalProps> = ({ isOpen, onClose, onLogin
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
       <div className="relative w-full max-w-md bg-white border-4 border-black rounded-2xl shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] p-6 animate-in fade-in zoom-in duration-200">
-        <button 
+        <button
           onClick={handleClose}
           className="absolute top-4 right-4 p-1 hover:bg-gray-100 rounded-lg transition-colors border-2 border-transparent hover:border-black"
         >
@@ -64,14 +65,13 @@ export const LoginModal: React.FC<LoginModalProps> = ({ isOpen, onClose, onLogin
             <KeyRound size={32} />
           </div>
           <h2 className="text-3xl font-black">{t('login.title')}</h2>
-          <p className="font-bold text-gray-500 text-sm mt-1">
-            Admin: <code className="bg-gray-100 px-1 rounded border border-gray-300">admin</code> / <code className="bg-gray-100 px-1 rounded border border-gray-300">123456</code>
-          </p>
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
-            <label className="block font-black text-lg mb-2">{t('login.username')}</label>
+            <label className="block font-black text-lg mb-2 flex items-center gap-2">
+              <User size={18} /> {t('login.username')}
+            </label>
             <input
               type="text"
               value={username}
@@ -102,7 +102,7 @@ export const LoginModal: React.FC<LoginModalProps> = ({ isOpen, onClose, onLogin
               {error}
             </div>
           )}
-          
+
           <ToonButton type="submit" className="w-full py-3 mt-2" isLoading={isLoading}>
             {isLoading ? t('login.unlocking') : t('login.unlock')}
           </ToonButton>

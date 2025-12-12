@@ -1,5 +1,5 @@
+import { AlertTriangle, Info, X } from 'lucide-react';
 import React, { useEffect } from 'react';
-import { X, AlertTriangle, Info } from 'lucide-react';
 
 interface ToonModalProps {
   isOpen: boolean;
@@ -10,13 +10,13 @@ interface ToonModalProps {
   variant?: 'default' | 'danger';
 }
 
-export const ToonModal: React.FC<ToonModalProps> = ({ 
-  isOpen, 
-  onClose, 
-  title, 
-  children, 
+export const ToonModal: React.FC<ToonModalProps> = ({
+  isOpen,
+  onClose,
+  title,
+  children,
   footer,
-  variant = 'default' 
+  variant = 'default',
 }) => {
   // Prevent scrolling when modal is open
   useEffect(() => {
@@ -34,38 +34,31 @@ export const ToonModal: React.FC<ToonModalProps> = ({
 
   const headerColors = {
     default: 'bg-toon-yellow',
-    danger: 'bg-toon-red text-white'
+    danger: 'bg-toon-red text-white',
   };
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
       {/* Backdrop */}
-      <div 
-        className="absolute inset-0 bg-black/60 backdrop-blur-sm"
-        onClick={onClose}
-      />
-      
+      <button className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={onClose} />
+
       {/* Modal Content */}
       <div className="relative w-full max-w-md bg-white border-4 border-black rounded-2xl shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] overflow-hidden animate-in fade-in zoom-in duration-200">
-        
         {/* Header */}
-        <div className={`flex items-center justify-between px-6 py-4 border-b-4 border-black ${headerColors[variant]}`}>
+        <div
+          className={`flex items-center justify-between px-6 py-4 border-b-4 border-black ${headerColors[variant]}`}
+        >
           <div className="flex items-center gap-3">
             {variant === 'danger' ? <AlertTriangle size={24} /> : <Info size={24} />}
             <h3 className="text-xl font-black uppercase tracking-wide">{title}</h3>
           </div>
-          <button 
-            onClick={onClose}
-            className="p-1 hover:bg-black/10 rounded-lg transition-colors"
-          >
+          <button onClick={onClose} className="p-1 hover:bg-black/10 rounded-lg transition-colors">
             <X size={24} />
           </button>
         </div>
 
         {/* Body */}
-        <div className="p-6 text-lg font-bold text-gray-700">
-          {children}
-        </div>
+        <div className="p-6 text-lg font-bold text-gray-700">{children}</div>
 
         {/* Footer */}
         {footer && (
