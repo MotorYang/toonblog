@@ -1,4 +1,4 @@
-import { Edit3, Eye, Loader2, Lock, PenTool, Save, Upload, Wand2, X } from 'lucide-react';
+import { Edit3, Eye, Loader2, Lock, Save, Upload, Wand2, X } from 'lucide-react';
 import React, { useEffect, useRef, useState } from 'react';
 import ReactMarkdown from 'react-markdown';
 import { useNavigate } from 'react-router-dom';
@@ -122,11 +122,8 @@ export const CreatePost: React.FC = () => {
 
   return (
     <div className="max-w-2xl mx-auto">
-      <div className="text-center mb-4 md:mb-8">
-        <h1 className="text-3xl md:text-4xl font-black flex items-center justify-center gap-3">
-          <PenTool size={32} className="text-toon-blue md:w-10 md:h-10" />
-          {t('create.title')}
-        </h1>
+      <div className="mb-6 text-center">
+        <h1 className="text-4xl font-black text-black">{t('create.title')}</h1>
         <p className="font-bold text-gray-600">{t('create.subtitle')}</p>
       </div>
 
