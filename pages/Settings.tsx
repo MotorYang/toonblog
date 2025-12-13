@@ -2,6 +2,7 @@ import { Key, Link, Loader2, Music, Plus, Save, Trash2, Type, User } from 'lucid
 import React, { useEffect, useState } from 'react';
 
 import { Tip } from '../components/GlobalTip';
+import { ToonButton } from '../components/ToonButton';
 import { ToonCard } from '../components/ToonCard';
 import { useLanguage } from '../context/LanguageContext';
 import { MusicTrack, settingsApi, SettingsPayload } from '../services/modules/settings';
@@ -213,28 +214,19 @@ export const Settings: React.FC = () => {
 
           {/* 底部保存按钮 */}
           <div className="pt-6 sticky bottom-4 z-10">
-            <button
-              type="submit"
-              disabled={isSaving}
-              className={`w-full py-4 rounded-xl font-black text-xl text-white flex items-center justify-center gap-2 shadow-lg transition-all
-                ${
-                  isSaving
-                    ? 'bg-gray-400 cursor-not-allowed'
-                    : 'bg-black hover:bg-gray-800 hover:scale-[1.01] active:scale-95'
-                }`}
-            >
+            <ToonButton type="submit" disabled={isSaving} className="w-full py-4 text-xl">
               {isSaving ? (
                 <>
-                  <Loader2 className="animate-spin" size={24} />
-                  Saving...
+                  <Loader2 className="animate-spin" />
+                  {t('global.saving')}
                 </>
               ) : (
                 <>
-                  <Save size={24} />
+                  <Save className="mr-2" />
                   {t('global.save')}
                 </>
               )}
-            </button>
+            </ToonButton>
           </div>
         </form>
       </ToonCard>
