@@ -1,0 +1,41 @@
+name: Deploy Frontend to Nginx Server
+
+on:
+  push:
+    branches:
+      - main  # 监听 main 分支的 push 事件
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v2
+
+    - name: Setup Node.js
+      uses: actions/setup-node@v2
+      with:
+        node-version: '24.12.0'  # 使用你项目需要的 Node.js 版本
+
+    - name: Install dependencies
+      run: |
+        npm install  # 安装项目依赖
+
+    - name: Build the project
+      run: |
+        npm run build  # 使用 "tsc && vite build" 命令进行构建
+
+    - name: Deploy to Nginx server
+      run: |
+        # 上传构建的静态文件到服务器的指定路径
+        rsync -avz --delete dist/ ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_IP }}:/path/to/your/nginx/directory
+      env:
+        SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
+
+    - name: Restart Nginx
+      run: |
+        ssh -o StrictHostKeyChecking=no ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_IP }} 'sudo systemctl restart nginx'
+      env:
+        SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
+        SSH_KNOWN_HOSTS: ${{ secrets.SSH_KNOWN_HOSTS }}  # 如果有服务器的主机密钥，可以在 secrets 中存储
