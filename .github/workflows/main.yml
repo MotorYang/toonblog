@@ -16,7 +16,7 @@ jobs:
     - name: Setup Node.js
       uses: actions/setup-node@v2
       with:
-        node-version: '24.12.0'
+        node-version: '24.12.0'  # 使用你的 Node.js 版本
 
     - name: Install dependencies
       run: |
@@ -25,6 +25,13 @@ jobs:
     - name: Build the project
       run: |
         npm run build  # 使用 "tsc && vite build" 命令进行构建
+
+    - name: Add SSH known hosts
+      run: |
+        mkdir -p ~/.ssh
+        echo "${{ secrets.SSH_KNOWN_HOSTS }}" >> ~/.ssh/known_hosts  # 将服务器的 SSH 公钥添加到 known_hosts
+      env:
+        SSH_KNOWN_HOSTS: ${{ secrets.SSH_KNOWN_HOSTS }}  # 使用 GitHub Secrets 存储的服务器公钥
 
     - name: Deploy to Nginx server
       run: |
@@ -37,4 +44,4 @@ jobs:
         ssh -o StrictHostKeyChecking=no -p ${{ secrets.SERVER_PORT }} ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_IP }} 'sudo systemctl restart nginx'
       env:
         SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
-        SSH_KNOWN_HOSTS: ${{ secrets.SSH_KNOWN_HOSTS }} 
+        SSH_KNOWN_HOSTS: ${{ secrets.SSH_KNOWN_HOSTS }}
