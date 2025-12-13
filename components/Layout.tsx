@@ -4,6 +4,7 @@ import { Link, useLocation } from 'react-router-dom';
 
 import { useAuth } from '../context/AuthContext';
 import { useLanguage } from '../context/LanguageContext';
+import { GlobalTip } from './GlobalTip';
 import { GlobalToolbox } from './GlobalToolbox';
 import { LanguageSelector } from './LanguageSelector';
 import { LoginModal } from './LoginModal';
@@ -126,6 +127,7 @@ export const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) =>
       <LoginModal isOpen={isLoginOpen} onClose={() => setIsLoginOpen(false)} onLogin={login} />
 
       <GlobalToolbox />
+      <GlobalTip />
     </div>
   );
 };
