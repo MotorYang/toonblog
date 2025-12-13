@@ -9,7 +9,7 @@ import { ToonModal } from '../components/ToonModal';
 import { useAuth } from '../context/AuthContext';
 import { useBlogStore } from '../context/BlogContext';
 import { useLanguage } from '../context/LanguageContext';
-import { generateSummary } from '../services/geminiService';
+import { generateSummary } from '../services/modules/geminiService';
 
 export const BlogPost: React.FC = () => {
   const { id } = useParams<{ id: string }>();

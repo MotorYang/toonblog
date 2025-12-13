@@ -1,5 +1,10 @@
 export const translations = {
   en: {
+    // Global
+    'global.save': 'Save',
+    'global.saved': 'Saved',
+    'global.saving': 'Saving',
+    'global.network.error': 'Network error',
     // Nav
     'nav.home': 'Home',
     'nav.create': 'Create',
@@ -62,6 +67,7 @@ export const translations = {
     // Settings
     'settings.title': 'Settings',
     'settings.music': 'Music',
+    'settings.load.error': 'Failed to load settings!',
     // Login
     'login.title': 'Who Goes There?',
     'login.username': 'Username',
@@ -78,6 +84,11 @@ export const translations = {
     'tool.send_error': 'Error connecting to AI brain.',
   },
   zh: {
+    // Global
+    'global.save': '保存',
+    'global.saved': '已保存',
+    'global.saving': '保存中...',
+    'global.network.error': '网络错误',
     // Nav
     'nav.home': '首页',
     'nav.create': '创作',
@@ -138,6 +149,7 @@ export const translations = {
     // Settings
     'settings.title': '设置',
     'settings.music': '音乐',
+    'settings.load.error': '获取设置参数失败!',
     // Login
     'login.title': '来者何人？',
     'login.username': '用户名',

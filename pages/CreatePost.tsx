@@ -9,7 +9,7 @@ import { ToonModal } from '../components/ToonModal';
 import { useAuth } from '../context/AuthContext';
 import { useBlogStore } from '../context/BlogContext';
 import { useLanguage } from '../context/LanguageContext';
-import { generateBlogContent } from '../services/geminiService';
+import { generateBlogContent } from '../services/modules/geminiService';
 import { BlogPost } from '../types';
 
 export const CreatePost: React.FC = () => {

@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useState } from 'react';
 
-import { api } from '../services/api';
+import { userApi } from '../services/modules/user';
 import { AuthContextType } from '../types';
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -13,7 +13,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const login = async (username: string, password: string) => {
     setIsLoading(true);
     try {
-      const result = await api.auth.login(username, password);
+      const result = await userApi.auth.login(username, password);
       setUser(result.user);
       setIsAdmin(result.isAdmin);
     } catch (error) {

@@ -14,7 +14,7 @@ import {
 import React, { useEffect, useRef, useState } from 'react';
 
 import { useLanguage } from '../context/LanguageContext';
-import { getChatSession } from '../services/geminiService';
+import { getChatSession } from '../services/modules/geminiService';
 
 // Mock Playlist
 const PLAYLIST = [

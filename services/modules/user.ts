@@ -1,5 +1,5 @@
-import { INITIAL_POSTS } from '../constants';
-import { BlogPost } from '../types';
+import { INITIAL_POSTS } from '../../constants';
+import { BlogPost } from '../../types';
 
 // MOCK DATABASE
 let mockPosts: BlogPost[] = [...INITIAL_POSTS];
@@ -7,7 +7,7 @@ let mockPosts: BlogPost[] = [...INITIAL_POSTS];
 // Helper to simulate network delay
 const delay = (ms: number = 800) => new Promise((resolve) => setTimeout(resolve, ms));
 
-export const api = {
+export const userApi = {
   posts: {
     getAll: async (): Promise<BlogPost[]> => {
       await delay();
