@@ -26,22 +26,28 @@ jobs:
       run: |
         npm run build  # 使用 "tsc && vite build" 命令进行构建
 
+    - name: Setup SSH private key
+      run: |
+        mkdir -p ~/.ssh
+        echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/id_rsa
+        chmod 600 ~/.ssh/id_rsa  # 设置私钥权限
+
     - name: Add SSH known hosts
       run: |
         mkdir -p ~/.ssh
-        echo "${{ secrets.SSH_KNOWN_HOSTS }}" >> ~/.ssh/known_hosts  # 将服务器的 SSH 公钥添加到 known_hosts
+        echo "${{ secrets.SSH_KNOWN_HOSTS }}" >> ~/.ssh/known_hosts
       env:
         SSH_KNOWN_HOSTS: ${{ secrets.SSH_KNOWN_HOSTS }}  # 使用 GitHub Secrets 存储的服务器公钥
 
     - name: Deploy to Nginx server
       run: |
-        rsync -avz -e "ssh -p ${{ secrets.SERVER_PORT }}" --delete dist/ ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_IP }}:/path/to/your/nginx/directory
+        rsync -avz -e "ssh -p ${{ secrets.SERVER_PORT }} -i ~/.ssh/id_rsa" --delete dist/ ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_IP }}:/path/to/your/nginx/directory
       env:
         SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
 
     - name: Restart Nginx
       run: |
-        ssh -o StrictHostKeyChecking=no -p ${{ secrets.SERVER_PORT }} ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_IP }} 'sudo systemctl restart nginx'
+        ssh -o StrictHostKeyChecking=no -p ${{ secrets.SERVER_PORT }} -i ~/.ssh/id_rsa ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_IP }} 'sudo systemctl restart nginx'
       env:
         SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
         SSH_KNOWN_HOSTS: ${{ secrets.SSH_KNOWN_HOSTS }}
