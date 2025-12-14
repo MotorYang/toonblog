@@ -1,6 +1,5 @@
 import { request } from '../core/http';
 
-// 定义具体的业务数据类型
 export interface MusicTrack {
   name: string;
   author: string;
@@ -12,6 +11,10 @@ export interface SettingsPayload {
   musicTracks: MusicTrack[];
 }
 
+export interface ApiVerifyResult {
+  status: boolean;
+}
+
 // 导出 API 方法对象
 export const settingsApi = {
   // 获取设置
@@ -19,4 +22,7 @@ export const settingsApi = {
 
   // 保存设置
   saveSettings: (data: SettingsPayload) => request.post<null, SettingsPayload>('/settings', data),
+
+  // 校验API Key
+  verifyApiKey: (key: string) => request.get<ApiVerifyResult>(`/settings/verify/${key}`),
 };

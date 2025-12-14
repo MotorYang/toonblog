@@ -1,5 +1,5 @@
 import { Key, Link, Loader2, Music, Plus, Save, Trash2, Type, User } from 'lucide-react';
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 
 import { Tip } from '../components/GlobalTip';
 import { ToonButton } from '../components/ToonButton';
@@ -9,6 +9,7 @@ import { MusicTrack, settingsApi, SettingsPayload } from '../services/modules/se
 
 export const Settings: React.FC = () => {
   const { t } = useLanguage();
+  const apiInputRef = useRef<HTMLInputElement | null>(null);
 
   // --- 状态管理 ---
   const [apiKey, setApiKey] = useState<string>('');
@@ -58,6 +59,20 @@ export const Settings: React.FC = () => {
     }
   };
 
+  // --- 校验API ---
+  const handleVerifyApi = async () => {
+    if (!apiKey) {
+      Tip.warning(t('settings.api.emptyTip'));
+      return;
+    }
+    const result = await settingsApi.verifyApiKey(apiKey.trim().toLowerCase());
+    if (!result.status) {
+      Tip.warning(t('settings.api.verifyApiKeyFailed'));
+      apiInputRef.current?.focus();
+    }
+    Tip.success(t('settings.api.verifyApiKeyOk'));
+  };
+
   // --- 列表操作逻辑 ---
   const updateTrack = (index: number, field: keyof MusicTrack, value: string) => {
     const newTracks = [...tracks];
@@ -100,23 +115,32 @@ export const Settings: React.FC = () => {
           <div className="space-y-4">
             <h2 className="text-xl font-bold flex items-center gap-2 text-gray-700 border-b-4 border-yellow-100 pb-2">
               <Key className="text-yellow-600" />
-              Gemini API Configuration
+              {t('settings.api.title')}
             </h2>
 
             <div className="space-y-1">
               <label className="block text-xs font-bold uppercase text-gray-500 tracking-wider ml-1">
                 API Key
               </label>
-              <input
-                type="password"
-                value={apiKey}
-                onChange={(e) => setApiKey(e.target.value)}
-                placeholder="Ex: AIzaSy..."
-                className={inputBaseClass}
-              />
-              <p className="text-xs text-gray-400 mt-1 ml-1">
-                Required for AI generation features.
-              </p>
+              <div className="relative w-full">
+                <input
+                  ref={apiInputRef}
+                  type="password"
+                  value={apiKey}
+                  onChange={(e) => setApiKey(e.target.value)}
+                  placeholder="Ex: AIzaSy..."
+                  className={`${inputBaseClass} pr-12`} // 右侧留空间
+                />
+
+                <button
+                  type="button"
+                  className="absolute right-2 top-1/2 -translate-y-1/2 px-4 py-1.5 md:py-2 bg-toon-yellow text-toon-ink hover:bg-yellow-400 rounded-xl transition-colors font-bold text-xs md:text-sm"
+                  onClick={handleVerifyApi}
+                >
+                  {t('settings.api.verify')}
+                </button>
+              </div>
+              <p className="text-xs text-gray-400 mt-1 ml-1">{t('settings.api.tips')}</p>
             </div>
           </div>
 
@@ -125,7 +149,7 @@ export const Settings: React.FC = () => {
             <div className="flex items-center justify-between border-b-4 border-yellow-100 pb-2">
               <h2 className="text-xl font-bold flex items-center gap-2 text-gray-700">
                 <Music className="text-yellow-600" />
-                Background Music ({tracks.length})
+                {t('settings.music.title')} ({tracks.length})
               </h2>
             </div>
 
@@ -133,7 +157,7 @@ export const Settings: React.FC = () => {
             {tracks.length === 0 && (
               <div className="text-center py-10 bg-gray-50 border-2 border-dashed border-gray-200 rounded-xl text-gray-400">
                 <Music size={40} className="mx-auto mb-2 opacity-20" />
-                <p>No music added yet.</p>
+                {t('settings.music.noAdded')}
               </div>
             )}
 
@@ -161,7 +185,7 @@ export const Settings: React.FC = () => {
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mb-3">
                     <div>
                       <label className="flex items-center gap-1 text-xs font-bold text-gray-400 mb-1">
-                        <Type size={12} /> Name
+                        <Type size={12} /> {t('settings.music.name')}
                       </label>
                       <input
                         type="text"
@@ -173,7 +197,7 @@ export const Settings: React.FC = () => {
                     </div>
                     <div>
                       <label className="flex items-center gap-1 text-xs font-bold text-gray-400 mb-1">
-                        <User size={12} /> Author
+                        <User size={12} /> {t('settings.music.author')}
                       </label>
                       <input
                         type="text"
@@ -187,7 +211,7 @@ export const Settings: React.FC = () => {
 
                   <div>
                     <label className="flex items-center gap-1 text-xs font-bold text-gray-400 mb-1">
-                      <Link size={12} /> Audio URL
+                      <Link size={12} /> {t('settings.music.url')}
                     </label>
                     <input
                       type="url"
@@ -208,7 +232,7 @@ export const Settings: React.FC = () => {
               className="w-full py-4 border-2 border-dashed border-gray-300 text-gray-400 rounded-xl hover:border-yellow-500 hover:text-yellow-600 hover:bg-yellow-50 transition-all flex items-center justify-center gap-2 font-bold"
             >
               <Plus size={20} />
-              Add Music Track
+              {t('settings.music.addTrack')}
             </button>
           </div>
 

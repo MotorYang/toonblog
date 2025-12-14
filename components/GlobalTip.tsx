@@ -26,10 +26,12 @@ export const Tip = {
   success: (message: string, duration = 3000) => {
     if (tipRef) tipRef.add({ message, type: 'success', duration });
   },
+  warning: (message: string, duration = 3000) => {
+    if (tipRef) tipRef.add({ message, type: 'warning', duration });
+  },
   error: (message: string, duration = 4000) => {
     if (tipRef) tipRef.add({ message, type: 'error', duration });
   },
-  // 支持你想要的配置对象写法 Tip.config({ ... }).show()
   config: (config: TipConfig) => {
     return {
       show: () => {
