@@ -1,11 +1,28 @@
-import { Key, Link, Loader2, Music, Plus, Save, Trash2, Type, User } from 'lucide-react';
+import {
+  BookOpen,
+  Info,
+  Key,
+  Link,
+  Loader2,
+  Music,
+  Plus,
+  Save,
+  Trash2,
+  Type,
+  User,
+} from 'lucide-react';
 import React, { useEffect, useRef, useState } from 'react';
 
 import { Tip } from '../components/GlobalTip';
 import { ToonButton } from '../components/ToonButton';
 import { ToonCard } from '../components/ToonCard';
 import { useLanguage } from '../context/LanguageContext';
-import { MusicTrack, settingsApi, SettingsPayload } from '../services/modules/settings';
+import {
+  ArticleCategory,
+  MusicTrack,
+  settingsApi,
+  SettingsPayload,
+} from '../services/modules/settings';
 
 export const Settings: React.FC = () => {
   const { t } = useLanguage();
@@ -14,6 +31,7 @@ export const Settings: React.FC = () => {
   // --- 状态管理 ---
   const [apiKey, setApiKey] = useState<string>('');
   const [tracks, setTracks] = useState<MusicTrack[]>([]);
+  const [categories, setCategories] = useState<ArticleCategory[]>([]);
 
   // UI 交互状态
   const [isLoading, setIsLoading] = useState<boolean>(true);
@@ -80,6 +98,31 @@ export const Settings: React.FC = () => {
     setTracks(newTracks);
   };
 
+  const updateCategory = (index: number, field: keyof ArticleCategory, value: string) => {
+    const newCategory = [...categories];
+    newCategory[index] = { ...newCategory[index], [field]: value };
+    setCategories(newCategory);
+  };
+
+  const addCategory = () => {
+    setCategories([
+      ...categories,
+      { id: null, code: '', name_zh: '', name_en: '', remark: '', count: 0 },
+    ]);
+  };
+
+  const removeCategory = async (index: number) => {
+    const category = categories[index];
+    if (category.id) {
+      const result = await settingsApi.deleteCategoryBefore(category.id);
+      if (!result.status) {
+        Tip.warning(t('settings.category.banDel'));
+        return;
+      }
+    }
+    setCategories(categories.filter((_, i) => i !== index));
+  };
+
   const addTrack = () => {
     setTracks([...tracks, { name: '', author: '', url: '' }]);
   };
@@ -142,6 +185,97 @@ export const Settings: React.FC = () => {
               </div>
               <p className="text-xs text-gray-400 mt-1 ml-1">{t('settings.api.tips')}</p>
             </div>
+          </div>
+
+          {/* 区域 2: 文章分类 (动态增删) */}
+          <div className="space-y-5">
+            <div className="flex items-center justify-between border-b-4 border-yellow-100 pb-2">
+              <h2 className="text-xl font-bold flex items-center gap-2 text-gray-700">
+                <BookOpen className="text-yellow-600" />
+                {t('settings.category.title')} ({categories.length})
+              </h2>
+            </div>
+
+            {/* 空列表提示 */}
+            {categories.length === 0 && (
+              <div className="text-center py-10 bg-gray-50 border-2 border-dashed border-gray-200 rounded-xl text-gray-400">
+                <BookOpen size={40} className="mx-auto mb-2 opacity-20" />
+                {t('settings.category.noAdded')}
+              </div>
+            )}
+
+            {/* 列表渲染 */}
+            <div className="space-y-4">
+              {categories.map((category, index) => (
+                <div
+                  key={index}
+                  className="bg-yellow-50/30 p-4 rounded-2xl border-2 border-yellow-100 relative transition-all hover:border-yellow-300 hover:shadow-sm"
+                >
+                  <div className="flex justify-between items-start mb-3">
+                    <span className="bg-yellow-200 text-yellow-800 text-xs font-black px-2 py-1 rounded-md">
+                      #{index + 1}
+                    </span>
+                    <button
+                      type="button"
+                      onClick={() => removeCategory(index)}
+                      className="text-red-300 hover:text-red-500 hover:bg-red-50 p-1.5 rounded-lg transition-colors"
+                      title="Delete Category"
+                    >
+                      <Trash2 size={18} />
+                    </button>
+                  </div>
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mb-3">
+                    <div>
+                      <label className="flex items-center gap-1 text-xs font-bold text-gray-400 mb-1">
+                        <Type size={12} /> {t('settings.category.chinese')}
+                      </label>
+                      <input
+                        type="text"
+                        value={category.name_zh}
+                        onChange={(e) => updateCategory(index, 'name_zh', e.target.value)}
+                        placeholder="文章分类（中文）"
+                        className={inputBaseClass}
+                      />
+                    </div>
+                    <div>
+                      <label className="flex items-center gap-1 text-xs font-bold text-gray-400 mb-1">
+                        <Type size={12} /> {t('settings.category.english')}
+                      </label>
+                      <input
+                        type="text"
+                        value={category.name_en}
+                        onChange={(e) => updateCategory(index, 'name_en', e.target.value)}
+                        placeholder="Article Classification"
+                        className={inputBaseClass}
+                      />
+                    </div>
+                  </div>
+
+                  <div>
+                    <label className="flex items-center gap-1 text-xs font-bold text-gray-400 mb-1">
+                      <Info size={12} /> {t('settings.category.remark')}
+                    </label>
+                    <textarea
+                      value={category.remark}
+                      onChange={(e) => updateCategory(index, 'remark', e.target.value)}
+                      placeholder="Remark..."
+                      className={inputBaseClass}
+                    />
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            {/* 添加按钮 */}
+            <button
+              type="button"
+              onClick={addCategory}
+              className="w-full py-4 border-2 border-dashed border-gray-300 text-gray-400 rounded-xl hover:border-yellow-500 hover:text-yellow-600 hover:bg-yellow-50 transition-all flex items-center justify-center gap-2 font-bold"
+            >
+              <Plus size={20} />
+              {t('settings.category.add')}
+            </button>
           </div>
 
           {/* 区域 2: 音乐列表 (动态增删) */}
