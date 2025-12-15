@@ -1,23 +1,31 @@
 import React, { createContext, useContext, useState } from 'react';
 
+import { Tip } from '../components/GlobalTip';
 import { userApi } from '../services/modules/user';
 import { AuthContextType } from '../types';
+import { User, UserLoginResponse } from '../types/auth';
+import { useLanguage } from './LanguageContext';
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [user, setUser] = useState<string | null>(null);
+  const { t } = useLanguage();
+
+  const [user, setUser] = useState<User | null>(null);
   const [isAdmin, setIsAdmin] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
 
-  const login = async (username: string, password: string) => {
+  const login = async (account: string, password: string) => {
     setIsLoading(true);
     try {
-      const result = await userApi.auth.login(username, password);
+      const result: UserLoginResponse = await userApi.login({ account, password });
       setUser(result.user);
-      setIsAdmin(result.isAdmin);
+      if (result.role.includes('admin')) {
+        setIsAdmin(true);
+      }
     } catch (error) {
       console.error('Login failed', error);
+      Tip.error(t('auth.login.error'));
       throw error;
     } finally {
       setIsLoading(false);

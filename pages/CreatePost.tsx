@@ -10,7 +10,7 @@ import { useAuth } from '../context/AuthContext';
 import { useBlogStore } from '../context/BlogContext';
 import { useLanguage } from '../context/LanguageContext';
 import { generateBlogContent } from '../services/modules/geminiService';
-import { BlogPost } from '../types';
+import { Article } from '../types';
 
 export const CreatePost: React.FC = () => {
   const navigate = useNavigate();
@@ -102,7 +102,7 @@ export const CreatePost: React.FC = () => {
     e.preventDefault();
     if (!title || !content) return;
 
-    const newPost: BlogPost = {
+    const newPost: Article = {
       id: Date.now().toString(),
       title,
       content,

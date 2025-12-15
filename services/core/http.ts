@@ -3,7 +3,7 @@ import axios, { AxiosError, AxiosInstance, AxiosResponse, InternalAxiosRequestCo
 import { Tip } from '../../components/GlobalTip';
 
 // 定义后端基础地址
-const BASE_URL = '/api';
+const BASE_URL = 'http://localhost:8888';
 
 const http: AxiosInstance = axios.create({
   baseURL: BASE_URL,
@@ -42,10 +42,10 @@ http.interceptors.response.use(
 
     // 业务错误处理 (比如 code: 4001 代表参数错误)
     // 统一在这里弹窗，业务层就不用写 Tip.error 了
-    Tip.error(res.message || '业务处理失败');
+    // Tip.error(res.message || '业务处理失败');
 
     // 抛出错误，中断 Promise 链，让业务层的 catch 捕获（如果需要停止 loading）
-    return Promise.reject(new Error(res.message || 'Error'));
+    return Promise.reject(new Error(res.msg || 'Error'));
   },
   (error: AxiosError) => {
     // --- HTTP 状态码错误处理 (404, 500, 网络中断) ---

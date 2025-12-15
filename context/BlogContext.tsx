@@ -1,12 +1,12 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
 
-import { userApi } from '../services/modules/user';
-import { BlogContextType, BlogPost } from '../types';
+import { articleApi } from '../services/mock/article';
+import { Article, BlogContextType } from '../types';
 
 const BlogContext = createContext<BlogContextType | undefined>(undefined);
 
 export const BlogProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [posts, setPosts] = useState<BlogPost[]>([]);
+  const [posts, setPosts] = useState<Article[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
   // Fetch posts on mount
@@ -14,7 +14,7 @@ export const BlogProvider: React.FC<{ children: React.ReactNode }> = ({ children
     const fetchPosts = async () => {
       setIsLoading(true);
       try {
-        const data = await userApi.posts.getAll();
+        const data = await articleApi.article.getAll();
         setPosts(data);
       } catch (error) {
         console.error('Failed to fetch posts', error);
@@ -26,10 +26,10 @@ export const BlogProvider: React.FC<{ children: React.ReactNode }> = ({ children
     fetchPosts();
   }, []);
 
-  const addPost = async (post: BlogPost) => {
+  const addPost = async (post: Article) => {
     // Optimistic update could go here, but let's wait for API for consistency
     try {
-      const newPost = await userApi.posts.create(post);
+      const newPost = await articleApi.article.create(post);
       setPosts((prev) => [newPost, ...prev]);
     } catch (error) {
       console.error('Failed to create post', error);
@@ -39,7 +39,7 @@ export const BlogProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const deletePost = async (id: string) => {
     try {
-      await userApi.posts.delete(id);
+      await articleApi.article.delete(id);
       setPosts((prev) => prev.filter((p) => p.id !== id));
     } catch (error) {
       console.error('Failed to delete post', error);
@@ -53,7 +53,7 @@ export const BlogProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const incrementViews = async (id: string) => {
     try {
-      const newViewCount = await userApi.posts.incrementViews(id);
+      const newViewCount = await articleApi.article.incrementViews(id);
       setPosts((prev) =>
         prev.map((post) => (post.id === id ? { ...post, views: newViewCount } : post)),
       );

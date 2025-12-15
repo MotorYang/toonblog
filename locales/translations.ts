@@ -5,6 +5,8 @@ export const translations = {
     'global.saved': 'Saved',
     'global.saving': 'Saving',
     'global.network.error': 'Network error',
+    // Auth
+    'auth.login.error': 'Login failed!',
     // Nav
     'nav.home': 'Home',
     'nav.create': 'Create',
@@ -108,6 +110,8 @@ export const translations = {
     'global.saved': '已保存',
     'global.saving': '保存中...',
     'global.network.error': '网络错误',
+    // Auth
+    'auth.login.error': '登录错误',
     // Nav
     'nav.home': '首页',
     'nav.create': '创作',
