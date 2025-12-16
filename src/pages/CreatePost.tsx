@@ -11,7 +11,7 @@ import { useLanguage } from '@/context/LanguageContext';
 import { userAuthStore } from '@/stores/userAuthStore.ts';
 
 import { Article } from '../../types.ts';
-import { generateBlogContent } from '../services/modules/geminiService';
+import { generateBlogContent } from '../services/geminiService.ts';
 
 export const CreatePost: React.FC = () => {
   const navigate = useNavigate();

@@ -11,7 +11,7 @@ const App: React.FC = () => {
     <ThemeProvider>
       <LanguageProvider>
         <BlogProvider>
-          <HashRouter>
+          <HashRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
             <AppRoutes />
           </HashRouter>
         </BlogProvider>

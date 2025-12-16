@@ -138,7 +138,7 @@ export function register(params: RegisterParams): Promise<UserInfo> {
  * @returns Promise<void>
  */
 export function logout(): Promise<void> {
-  return http.post<void>('/system/auth/logout');
+  return http.get<void>('/system/auth/logout');
 }
 
 /**

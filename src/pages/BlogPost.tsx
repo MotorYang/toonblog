@@ -10,7 +10,7 @@ import { useBlogStore } from '@/context/BlogContext';
 import { useLanguage } from '@/context/LanguageContext';
 import { userAuthStore } from '@/stores/userAuthStore.ts';
 
-import { generateSummary } from '../services/modules/geminiService';
+import { generateSummary } from '../services/geminiService.ts';
 
 export const BlogPost: React.FC = () => {
   const { id } = useParams<{ id: string }>();

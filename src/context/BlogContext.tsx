@@ -1,7 +1,8 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
 
+import { articleApi } from '@/api/mock/article';
+
 import { Article, BlogContextType } from '../../types.ts';
-import { articleApi } from '../services/mock/article';
 
 const BlogContext = createContext<BlogContextType | undefined>(undefined);
 

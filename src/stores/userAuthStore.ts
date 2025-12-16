@@ -75,7 +75,7 @@ export const userAuthStore = create<AuthState>()(
           });
           // 启动自动刷新 token 的定时器
           get().scheduleTokenRefresh();
-          Tip.success(translate('auth.login.success'));
+          Tip.success(translate('auth.login.success') + result.user.name);
         } catch (error) {
           console.error('Login failed:', error);
           throw error;
@@ -109,9 +109,6 @@ export const userAuthStore = create<AuthState>()(
             tokenExpiresAt: null,
             refreshTimerId: null,
           });
-
-          // 清理本地存储
-          localStorage.removeItem('token');
 
           Tip.success(translate('auth.logout.success'));
         }

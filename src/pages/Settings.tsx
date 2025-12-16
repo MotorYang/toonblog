@@ -17,13 +17,8 @@ import { Tip } from '@/components/GlobalTip';
 import { ToonButton } from '@/components/ToonButton';
 import { ToonCard } from '@/components/ToonCard';
 import { useLanguage } from '@/context/LanguageContext';
-
-import {
-  ArticleCategory,
-  MusicTrack,
-  settingsApi,
-  SettingsPayload,
-} from '../services/modules/settings';
+import { settingService } from '@/services/settingService';
+import { ArticleCategory, MusicTrack, SettingsPayload } from '@/types/settings';
 
 export const Settings: React.FC = () => {
   const { t } = useLanguage();
@@ -45,7 +40,7 @@ export const Settings: React.FC = () => {
     const loadSetting = async () => {
       try {
         setIsLoading(true);
-        const data = await settingsApi.getSettings();
+        const data = await settingService.getSettings();
         setApiKey(data.apiKey || '');
         setTracks(data.musicTracks || []);
       } catch (error) {
@@ -68,7 +63,7 @@ export const Settings: React.FC = () => {
     };
 
     try {
-      await settingsApi.saveSettings(payload);
+      await settingService.saveSettings(payload);
       // 只有成功才会走到这里，失败会被拦截器捕获并 throw 出去跳到 catch
       Tip.success(t('settings.saved') || 'Settings saved successfully!');
     } catch (error) {
@@ -84,7 +79,7 @@ export const Settings: React.FC = () => {
       Tip.warning(t('settings.api.emptyTip'));
       return;
     }
-    const result = await settingsApi.verifyApiKey(apiKey.trim().toLowerCase());
+    const result = await settingService.verifyApiKey(apiKey.trim().toLowerCase());
     if (!result.status) {
       Tip.warning(t('settings.api.verifyApiKeyFailed'));
       apiInputRef.current?.focus();
@@ -115,7 +110,7 @@ export const Settings: React.FC = () => {
   const removeCategory = async (index: number) => {
     const category = categories[index];
     if (category.id) {
-      const result = await settingsApi.deleteCategoryBefore(category.id);
+      const result = await settingService.deleteCategoryBefore(category.id);
       if (!result.status) {
         Tip.warning(t('settings.category.banDel'));
         return;

@@ -9,6 +9,8 @@ export const translations = {
     'http.api.error': 'API error',
     // Auth
     'auth.login.error': 'Login failed!',
+    'auth.login.success': 'Welcome back ',
+    'auth.logout.success': 'Bye ~, Happy every day!',
     'auth.permission.denied': 'Permission denied',
     'auth.permission.adminOnly': 'Admin access only',
     'auth.permission.loginRequired': 'Please login first',
@@ -120,6 +122,8 @@ export const translations = {
     'http.api.error': 'API调用错误',
     // Auth
     'auth.login.error': '登录错误',
+    'auth.login.success': '欢迎回家 ',
+    'auth.logout.success': '再见，祝天天开心！',
     'auth.permission.denied': '权限不足',
     'auth.permission.adminOnly': '仅管理员可访问',
     'auth.permission.loginRequired': '请先登录',
