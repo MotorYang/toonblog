@@ -1,4 +1,6 @@
-export interface BlogPost {
+import { User } from '@/types/auth';
+
+export interface Article {
   id: string;
   title: string;
   excerpt: string;
@@ -12,16 +14,16 @@ export interface BlogPost {
 }
 
 export interface BlogContextType {
-  posts: BlogPost[];
+  posts: Article[];
   isLoading: boolean;
-  addPost: (post: BlogPost) => Promise<void>;
+  addPost: (post: Article) => Promise<void>;
   deletePost: (id: string) => Promise<void>;
-  getPost: (id: string) => BlogPost | undefined;
+  getPost: (id: string) => Article | undefined;
   incrementViews: (id: string) => Promise<void>;
 }
 
 export interface AuthContextType {
-  user: string | null;
+  user: User | null;
   isAdmin: boolean;
   isLoading: boolean;
   login: (username: string, password: string) => Promise<void>;
