@@ -3,15 +3,15 @@ import React, { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { useNavigate } from 'react-router-dom';
 
-import { useLanguage } from '@/context/LanguageContext';
+import { useLanguage } from '@/context/LanguageContext.tsx';
 import { userAuthStore } from '@/stores/userAuthStore.ts';
 
-import { ConfirmDialog } from './ConfirmDialog';
-import { GlobalTip } from './GlobalTip';
-import { GlobalToolbox } from './GlobalToolbox';
-import { LanguageSelector } from './LanguageSelector';
-import { LoginModal } from './LoginModal';
-import { ThemeSelector } from './ThemeSelector';
+import { ConfirmDialog } from '../components/ConfirmDialog.tsx';
+import { GlobalTip } from '../components/GlobalTip.tsx';
+import { GlobalToolbox } from '../components/GlobalToolbox.tsx';
+import { LanguageSelector } from '../components/LanguageSelector.tsx';
+import { LoginModal } from '../components/LoginModal.tsx';
+import { ThemeSelector } from '../components/ThemeSelector.tsx';
 
 export const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const navigate = useNavigate();

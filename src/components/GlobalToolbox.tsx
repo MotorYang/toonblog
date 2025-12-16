@@ -22,17 +22,17 @@ const PLAYLIST = [
   {
     title: '红色高跟鞋',
     artist: '蔡健雅',
-    url: 'https://m801.music.126.net/20251212113049/f545fd340fdb02f0416f965322118765/jdymusic/obj/wo3DlMOGwrbDjj7DisKw/28558895606/8835/a4cc/1782/f00d82e063edf24a844599abe6e0f65c.flac?vuutv=ux2GJY2oZkpjZ+zC5GnmUpzsNkbcIWO1aiCBEHjx+p109nShwJ7tlQaNhss9uMdab/st3aOJvGn7N1BixK/HYuV8krt06XDwtsmyUM87TQ8=',
+    url: 'http://music.163.com/song/media/outer/url?id=2046829393.mp3',
   },
   {
     title: '起风了',
     artist: '买辣椒也用券',
-    url: 'https://m701.music.126.net/20251212113315/be741489ad7391d4f66fee5c712f7d09/jdymusic/obj/wo3DlMOGwrbDjj7DisKw/28481714396/6c87/85e4/ab54/32f5945c4e22ee3bc275544dd3bcc66c.flac?vuutv=DiM23pTxYAEsndGw2S+y+P5TR4LYRZ45dZZPDdxLcOVJmBx+HOHhZCNQicFDZOrXn/e3PPrNyTkCXYdSAtJwzyj/RAKhvrZhjRmXCbFu2FE=',
+    url: 'http://music.163.com/song/media/outer/url?id=1330348068.mp3',
   },
   {
-    title: '孤岛',
-    artist: '赵二',
-    url: 'https://m7.music.126.net/20251212113402/4fd1aaeaaa919297aa07b7ffe5b5ba1c/ymusic/obj/w5zDlMODwrDDiGjCn8Ky/14050766620/914d/cbac/c7af/6be58fd37a4343ab31be1cd93e6ffe5e.flac?vuutv=Nxjuht/v8Ib06AobS7l6R65Q0aqqirTB/NdnIEPzbiXR15yMocLxH0o/pDodGnjkJCqp0rHQ5zMHHRUjejtvXuS3XhgF1fKAdOAk3BYV+u0=',
+    title: '城南花已开',
+    artist: '三亩地',
+    url: 'http://music.163.com/song/media/outer/url?id=468176711.mp3',
   },
 ];
 
@@ -54,10 +54,30 @@ export const GlobalToolbox: React.FC = () => {
   const chatEndRef = useRef<HTMLDivElement>(null);
   const [chatError, setChatError] = useState('');
 
-  // Init Audio
+  // Init Audio - 自动播放第一首歌
   useEffect(() => {
     audioRef.current = new Audio(PLAYLIST[0].url);
     audioRef.current.addEventListener('ended', handleNextTrack);
+
+    // 尝试自动播放第一首歌
+    // 注意：某些浏览器可能会阻止自动播放，需要用户交互后才能播放
+    const playPromise = audioRef.current.play();
+
+    if (playPromise !== undefined) {
+      playPromise
+        .then(() => {
+          // 自动播放成功
+          setIsPlaying(true);
+          console.log('Auto-play started successfully');
+        })
+        .catch((error) => {
+          // 自动播放被阻止（常见于 Chrome、Safari 等浏览器）
+          console.log('Auto-play was prevented by browser:', error);
+          // 保持 isPlaying 为 false，用户需要手动点击播放
+          setIsPlaying(false);
+        });
+    }
+
     return () => {
       audioRef.current?.pause();
       audioRef.current?.removeEventListener('ended', handleNextTrack);

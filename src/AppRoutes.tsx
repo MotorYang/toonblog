@@ -1,8 +1,8 @@
 import React, { useEffect } from 'react';
 import { Route, Routes, useNavigate } from 'react-router-dom';
 
-import { Layout } from '@/components/Layout';
 import ProtectedRoute from '@/components/ProtectedRoute';
+import { Layout } from '@/layout/Layout.tsx';
 import { BlogPost } from '@/pages/BlogPost';
 import { CreatePost } from '@/pages/CreatePost';
 import { Dashboard } from '@/pages/Dashboard';
@@ -14,7 +14,6 @@ const AppRoutes: React.FC = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
-    // 🔧 在 Router 内部设置导航函数
     setNavigateFunction(() => {
       navigate('/', { replace: true });
     });
