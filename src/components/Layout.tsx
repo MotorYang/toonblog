@@ -1,10 +1,12 @@
 import { BarChart3, Ghost, Home, LogIn, LogOut, PenTool, Settings } from 'lucide-react';
 import React, { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 
 import { useLanguage } from '@/context/LanguageContext';
 import { userAuthStore } from '@/stores/userAuthStore.ts';
 
+import { ConfirmDialog } from './ConfirmDialog';
 import { GlobalTip } from './GlobalTip';
 import { GlobalToolbox } from './GlobalToolbox';
 import { LanguageSelector } from './LanguageSelector';
@@ -12,10 +14,12 @@ import { LoginModal } from './LoginModal';
 import { ThemeSelector } from './ThemeSelector';
 
 export const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+  const navigate = useNavigate();
   const location = useLocation();
   const { user, isAdmin, login, logout } = userAuthStore();
   const { t } = useLanguage();
   const [isLoginOpen, setIsLoginOpen] = useState(false);
+  const [isLogoutConfirmOpen, setIsLogoutConfirmOpen] = useState(false);
 
   const isActive = (path: string) => location.pathname === path;
 
@@ -26,6 +30,16 @@ export const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) =>
   const activeClassAdmin = 'bg-toon-blue text-toon-ink shadow-toon-hover';
   const activeClassDashboard = 'bg-toon-red text-toon-ink shadow-toon-hover';
   const activeClassSettings = 'bg-toon-purple text-toon-ink shadow-toon-hover';
+
+  const handleLogoutClick = () => {
+    setIsLogoutConfirmOpen(true);
+  };
+
+  const handleLogoutConfirm = () => {
+    logout().then(() => {
+      navigate('/');
+    });
+  };
 
   return (
     <div className="min-h-screen flex flex-col font-sans transition-colors duration-300">
@@ -93,7 +107,7 @@ export const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) =>
 
             {user ? (
               <button
-                onClick={logout}
+                onClick={handleLogoutClick}
                 className="flex items-center gap-2 px-2 md:px-3 py-1.5 md:py-2 border-2 border-black rounded-lg bg-gray-100 hover:bg-red-100 transition-colors font-bold text-xs md:text-sm text-gray-900"
                 title={t('nav.logout')}
               >
@@ -126,6 +140,14 @@ export const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) =>
       </footer>
 
       <LoginModal isOpen={isLoginOpen} onClose={() => setIsLoginOpen(false)} onLogin={login} />
+
+      <ConfirmDialog
+        isOpen={isLogoutConfirmOpen}
+        onClose={() => setIsLogoutConfirmOpen(false)}
+        onConfirm={handleLogoutConfirm}
+        message={t('auth.logout.message')}
+        variant="danger"
+      />
 
       <GlobalToolbox />
       <GlobalTip />

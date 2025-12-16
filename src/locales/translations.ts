@@ -5,12 +5,15 @@ export const translations = {
     'global.saved': 'Saved',
     'global.saving': 'Saving',
     'global.network.error': 'Network error',
+    'global.confirm.ok': 'Confirm',
+    'global.confirm.cancel': 'Cancel',
     // Http
     'http.api.error': 'API error',
     // Auth
     'auth.login.error': 'Login failed!',
     'auth.login.success': 'Welcome back ',
     'auth.logout.success': 'Bye ~, Happy every day!',
+    'auth.logout.message': 'You will need to log in again to access admin features.',
     'auth.permission.denied': 'Permission denied',
     'auth.permission.adminOnly': 'Admin access only',
     'auth.permission.loginRequired': 'Please login first',
@@ -118,12 +121,16 @@ export const translations = {
     'global.saved': '已保存',
     'global.saving': '保存中...',
     'global.network.error': '网络错误',
+    'global.confirm.title': '请确认',
+    'global.confirm.ok': '确定',
+    'global.confirm.cancel': '取消',
     // http
     'http.api.error': 'API调用错误',
     // Auth
     'auth.login.error': '登录错误',
     'auth.login.success': '欢迎回家 ',
     'auth.logout.success': '再见，祝天天开心！',
+    'auth.logout.message': '退出后需要重新登录才能使用管理功能!',
     'auth.permission.denied': '权限不足',
     'auth.permission.adminOnly': '仅管理员可访问',
     'auth.permission.loginRequired': '请先登录',
