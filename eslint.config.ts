@@ -53,17 +53,8 @@ export default defineConfig([
       'prettier/prettier': 'error',
 
       // import 插件规则
-      'import/no-unresolved': 'error',
-      'import/extensions': [
-        'error',
-        'ignorePackages',
-        {
-          ts: 'never',
-          tsx: 'never',
-          js: 'never',
-          jsx: 'never',
-        },
-      ],
+      'import/extensions': 'off',
+      'import/no-unresolved': 'off',
       'import/named': 'error',
       'import/default': 'error',
       'import/namespace': 'error',

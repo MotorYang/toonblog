@@ -1,4 +1,4 @@
-import { User } from './types/auth';
+import { User } from '@/types/auth';
 
 export interface Article {
   id: string;
