@@ -1,4 +1,4 @@
-import { ScrollText, Smile, Zap } from 'lucide-react';
+import { ScrollText, Smile } from 'lucide-react';
 import React from 'react';
 
 import { useTheme } from '@/context/ThemeContext';
@@ -9,14 +9,13 @@ export const ThemeSelector: React.FC = () => {
   const { theme, setTheme } = useTheme();
 
   const handleToggle = () => {
-    const order: Theme[] = ['cartoon', 'cyberpunk', 'chinese'];
+    const order: Theme[] = ['cartoon', 'chinese'];
     const nextIndex = (order.indexOf(theme) + 1) % order.length;
     setTheme(order[nextIndex]);
   };
 
   const icons = {
     cartoon: <Smile size={20} />,
-    cyberpunk: <Zap size={20} />,
     chinese: <ScrollText size={20} />,
   };
 

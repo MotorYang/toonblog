@@ -1,4 +1,4 @@
-import { ArrowLeft, Calendar, Eye, Sparkles, Trash2, User } from 'lucide-react';
+import { ArrowLeft, Calendar, Eye, Loader2, Sparkles, Tag, Trash2, User } from 'lucide-react';
 import React, { useEffect, useRef, useState } from 'react';
 import ReactMarkdown from 'react-markdown';
 import { useNavigate, useParams } from 'react-router-dom';
@@ -37,10 +37,17 @@ export const BlogPost: React.FC = () => {
 
   if (!post) {
     return (
-      <div className="text-center py-20">
-        <h2 className="text-4xl font-black mb-4">Oops!</h2>
-        <p className="mb-8 font-bold">Post not found.</p>
-        <ToonButton onClick={() => navigate('/')}>Go Home</ToonButton>
+      <div className="text-center py-20 animate-in fade-in scale-in duration-500">
+        <div className="bg-gradient-to-br from-gray-100 to-white p-12 border-4 border-black rounded-2xl shadow-toon-lg inline-block">
+          <div className="bg-toon-red/20 p-6 border-3 border-black rounded-full inline-block mb-4">
+            <Eye size={48} className="text-toon-red" />
+          </div>
+          <h2 className="text-4xl font-black mb-3 text-gray-900">找不到文章！</h2>
+          <p className="mb-6 font-bold text-gray-600">该文章可能已被删除或不存在</p>
+          <ToonButton onClick={() => navigate('/')}>
+            <ArrowLeft className="mr-2" size={20} /> 返回首页
+          </ToonButton>
+        </div>
       </div>
     );
   }
@@ -64,75 +71,167 @@ export const BlogPost: React.FC = () => {
   };
 
   return (
-    <div className="space-y-4 md:space-y-6">
-      <ToonButton variant="ghost" onClick={() => navigate('/')} className="mb-4">
-        <ArrowLeft className="mr-2" size={20} /> {t('post.back')}
-      </ToonButton>
+    <div className="max-w-4xl mx-auto space-y-6 pb-12">
+      {/* Back Button - 优化返回按钮 */}
+      <div className="animate-in fade-in slide-in-from-left-4 duration-500">
+        <ToonButton
+          variant="ghost"
+          onClick={() => navigate('/')}
+          className="shadow-toon-sm hover:shadow-toon"
+        >
+          <ArrowLeft className="mr-2" size={20} /> {t('post.back')}
+        </ToonButton>
+      </div>
 
-      <ToonCard className="relative overflow-hidden">
-        {/* Header Image */}
-        {post.imageUrl && (
-          <div className="w-full h-48 md:h-80 border-2 border-black rounded-lg overflow-hidden mb-4 md:mb-8 shadow-[4px_4px_0px_0px_rgba(0,0,0,0.2)]">
-            <img src={post.imageUrl} alt={post.title} className="w-full h-full object-cover" />
-          </div>
-        )}
-
-        {/* Title & Meta */}
-        <h1 className="text-3xl md:text-5xl font-black mb-4 leading-tight break-words">
-          {post.title}
-        </h1>
-
-        <div className="flex flex-wrap gap-2 md:gap-4 mb-6 md:mb-8 font-bold text-xs md:text-sm">
-          <span className="flex items-center gap-1 md:gap-2 bg-toon-yellow px-2 py-1 md:px-3 border-2 border-black rounded-full">
-            <User size={14} /> {post.author}
-          </span>
-          <span className="flex items-center gap-1 md:gap-2 bg-toon-blue px-2 py-1 md:px-3 border-2 border-black rounded-full">
-            <Calendar size={14} /> {post.date}
-          </span>
-          <span className="flex items-center gap-1 md:gap-2 bg-white px-2 py-1 md:px-3 border-2 border-black rounded-full">
-            <Eye size={14} /> {post.views?.toLocaleString()} {t('post.views')}
-          </span>
-          <span className="bg-black text-white px-2 py-1 md:px-3 rounded-full border-2 border-black">
-            {post.category}
-          </span>
-        </div>
-
-        {/* AI Summary Section */}
-        <div className="mb-8 p-4 bg-toon-bg border-2 border-dashed border-black rounded-xl">
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-2 gap-2">
-            <h3 className="font-black text-lg flex items-center gap-2">
-              <Sparkles className="text-toon-purple" /> {t('post.tldr')}
-            </h3>
-            {!summary && (
-              <ToonButton
-                variant="secondary"
-                onClick={handleGenerateSummary}
-                isLoading={loadingSummary}
-                className="scale-90 origin-left sm:origin-right"
-              >
-                {t('post.summarize')}
-              </ToonButton>
-            )}
-          </div>
-          {summary && (
-            <p className="font-medium text-gray-800 italic animate-pulse">&#34;{summary}&#34;</p>
+      <div
+        className="animate-in fade-in slide-in-from-bottom-4 duration-500"
+        style={{ animationDelay: '100ms' }}
+      >
+        <ToonCard className="relative overflow-hidden shadow-toon-lg">
+          {/* Header Image - 优化封面图 */}
+          {post.imageUrl && (
+            <div className="w-full h-56 md:h-96 border-4 border-black rounded-2xl overflow-hidden mb-6 md:mb-8 shadow-toon group">
+              <img
+                src={post.imageUrl}
+                alt={post.title}
+                className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+              />
+            </div>
           )}
-        </div>
 
-        {/* Content */}
-        <div className="prose prose-base md:prose-lg prose-headings:font-black prose-p:font-medium prose-a:text-toon-blue prose-a:font-bold prose-a:no-underline hover:prose-a:underline prose-blockquote:border-l-4 prose-blockquote:border-toon-purple prose-blockquote:bg-gray-50 prose-blockquote:p-4 prose-blockquote:not-italic prose-blockquote:rounded-r-lg prose-img:border-4 prose-img:border-black prose-img:rounded-xl max-w-none font-sans overflow-x-hidden">
-          <ReactMarkdown>{post.content}</ReactMarkdown>
-        </div>
+          {/* Title - 优化标题 */}
+          <h1
+            className="text-3xl md:text-6xl font-black mb-6 leading-tight break-words text-gray-900 animate-in fade-in slide-in-from-top-4 duration-500"
+            style={{ animationDelay: '200ms' }}
+          >
+            {post.title}
+          </h1>
 
-        {/* Actions */}
-        {isAdmin && (
-          <div className="mt-8 md:mt-12 pt-8 border-t-4 border-black flex justify-end">
-            <ToonButton variant="danger" onClick={() => setIsDeleteModalOpen(true)}>
-              <Trash2 size={20} className="mr-2" /> {t('post.delete')}
-            </ToonButton>
+          {/* Meta Info - 重新设计元信息 */}
+          <div
+            className="flex flex-wrap gap-3 mb-8 animate-in fade-in slide-in-from-left-4 duration-500"
+            style={{ animationDelay: '300ms' }}
+          >
+            <span className="flex items-center gap-2 bg-gradient-to-r from-toon-yellow to-yellow-300 px-4 py-2 md:px-5 md:py-2.5 border-3 border-black rounded-xl font-black text-sm md:text-base shadow-toon-sm hover:shadow-toon transition-shadow">
+              <div className="bg-white border-2 border-black rounded-full p-1">
+                <User size={16} />
+              </div>
+              {post.author}
+            </span>
+            <span className="flex items-center gap-2 bg-gradient-to-r from-toon-blue to-cyan-300 px-4 py-2 md:px-5 md:py-2.5 border-3 border-black rounded-xl font-black text-sm md:text-base shadow-toon-sm hover:shadow-toon transition-shadow text-white">
+              <Calendar size={16} />
+              {post.date}
+            </span>
+            <span className="flex items-center gap-2 bg-gradient-to-r from-white to-gray-100 px-4 py-2 md:px-5 md:py-2.5 border-3 border-black rounded-xl font-black text-sm md:text-base shadow-toon-sm hover:shadow-toon transition-shadow">
+              <Eye size={16} className="text-toon-purple" />
+              {post.views?.toLocaleString()}
+            </span>
           </div>
-        )}
-      </ToonCard>
+
+          {/* Tags - 优化标签显示 */}
+          {post.tags && post.tags.length > 0 && (
+            <div
+              className="flex flex-wrap gap-2 mb-8 animate-in fade-in slide-in-from-right-4 duration-500"
+              style={{ animationDelay: '400ms' }}
+            >
+              {post.tags.map((tag, index) => (
+                <span
+                  key={index}
+                  className="flex items-center gap-1.5 bg-white px-3 py-1.5 border-2 border-black rounded-lg font-bold text-xs md:text-sm shadow-toon-sm hover:shadow-toon hover:scale-105 transition-all"
+                  style={{ animationDelay: `${400 + index * 50}ms` }}
+                >
+                  <Tag size={12} />
+                  {tag}
+                </span>
+              ))}
+              <span className="flex items-center gap-1.5 bg-gradient-to-r from-gray-900 to-gray-700 text-white px-3 py-1.5 border-2 border-black rounded-lg font-black text-xs md:text-sm shadow-toon-sm">
+                {post.category}
+              </span>
+            </div>
+          )}
+
+          {/* AI Summary Section - 重新设计摘要区 */}
+          <div
+            className="mb-8 md:mb-10 animate-in fade-in scale-in duration-500"
+            style={{ animationDelay: '500ms' }}
+          >
+            <ToonCard color="yellow" className="border-4 border-black shadow-toon-lg">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-4 gap-3">
+                <div className="flex items-center gap-3">
+                  <div className="bg-gradient-to-br from-toon-purple to-purple-500 p-2.5 border-3 border-black rounded-xl shadow-toon-sm">
+                    <Sparkles className="text-white w-5 h-5" />
+                  </div>
+                  <h3 className="font-black text-lg md:text-xl text-gray-900">{t('post.tldr')}</h3>
+                </div>
+                {!summary && (
+                  <ToonButton
+                    variant="secondary"
+                    onClick={handleGenerateSummary}
+                    isLoading={loadingSummary}
+                    className="shadow-toon-sm hover:shadow-toon text-sm md:text-base"
+                  >
+                    {loadingSummary ? (
+                      <>
+                        <Loader2 size={16} className="animate-spin mr-2" />
+                        生成中...
+                      </>
+                    ) : (
+                      <>
+                        <Sparkles size={16} className="mr-2" />
+                        {t('post.summarize')}
+                      </>
+                    )}
+                  </ToonButton>
+                )}
+              </div>
+              {summary ? (
+                <div className="bg-white border-3 border-black rounded-xl p-4 md:p-6 animate-in fade-in slide-in-from-bottom-2 duration-500">
+                  <p className="font-bold text-sm md:text-base text-gray-800 leading-relaxed">
+                    <span className="text-toon-purple text-2xl mr-1">&#34;</span>
+                    {summary}
+                    <span className="text-toon-purple text-2xl ml-1">&#34;</span>
+                  </p>
+                </div>
+              ) : (
+                <div className="bg-white/50 border-2 border-dashed border-black rounded-xl p-6 text-center">
+                  <Sparkles size={32} className="mx-auto mb-2 text-gray-400" />
+                  <p className="text-sm font-bold text-gray-500">点击按钮生成 AI 摘要</p>
+                </div>
+              )}
+            </ToonCard>
+          </div>
+
+          {/* Content - 优化内容区域 */}
+          <div
+            className="animate-in fade-in slide-in-from-bottom-4 duration-500"
+            style={{ animationDelay: '600ms' }}
+          >
+            <div className="prose prose-base md:prose-xl prose-headings:font-black prose-headings:text-gray-900 prose-headings:mb-4 prose-p:font-medium prose-p:text-gray-800 prose-p:leading-relaxed prose-a:text-toon-blue prose-a:font-bold prose-a:no-underline hover:prose-a:underline prose-a:decoration-2 prose-blockquote:border-l-4 prose-blockquote:border-toon-purple prose-blockquote:bg-gradient-to-r prose-blockquote:from-purple-50 prose-blockquote:to-transparent prose-blockquote:p-4 prose-blockquote:not-italic prose-blockquote:rounded-r-xl prose-blockquote:font-bold prose-img:border-4 prose-img:border-black prose-img:rounded-2xl prose-img:shadow-toon prose-strong:text-gray-900 prose-strong:font-black prose-ul:font-medium prose-ol:font-medium prose-li:text-gray-800 max-w-none font-sans overflow-x-hidden">
+              <ReactMarkdown>{post.content}</ReactMarkdown>
+            </div>
+          </div>
+
+          {/* Admin Actions - 优化管理操作 */}
+          {isAdmin && (
+            <div
+              className="mt-12 pt-8 border-t-4 border-dashed border-gray-300 flex flex-col sm:flex-row justify-between items-center gap-4 animate-in fade-in slide-in-from-bottom-4 duration-500"
+              style={{ animationDelay: '700ms' }}
+            >
+              <div className="flex items-center gap-2 text-sm font-bold text-gray-600">
+                <div className="w-2 h-2 bg-toon-red rounded-full animate-pulse"></div>
+                管理员操作区
+              </div>
+              <ToonButton
+                variant="danger"
+                onClick={() => setIsDeleteModalOpen(true)}
+                className="shadow-toon hover:shadow-toon-lg"
+              >
+                <Trash2 size={20} className="mr-2" /> {t('post.delete')}
+              </ToonButton>
+            </div>
+          )}
+        </ToonCard>
+      </div>
 
       {/* Delete Confirmation Modal */}
       <ToonModal
@@ -151,7 +250,7 @@ export const BlogPost: React.FC = () => {
           </>
         }
       >
-        <p>{t('modal.delete_desc')}</p>
+        <p className="font-medium text-gray-700">{t('modal.delete_desc')}</p>
       </ToonModal>
     </div>
   );
