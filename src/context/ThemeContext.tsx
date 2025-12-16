@@ -19,7 +19,7 @@ export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   // Apply theme class to body/html
   useEffect(() => {
     const root = document.documentElement;
-    root.classList.remove('theme-cartoon', 'theme-cyberpunk', 'theme-chinese');
+    root.classList.remove('theme-cartoon', 'theme-chinese');
     root.classList.add(`theme-${theme}`);
   }, [theme]);
 

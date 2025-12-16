@@ -53,7 +53,7 @@ export const Tip = {
 
 // --- 组件部分 ---
 interface ToastItem extends TipConfig {
-  id: string; // 🔧 改为 string 类型
+  id: string;
 }
 
 export const GlobalTip: React.FC = () => {
@@ -63,10 +63,14 @@ export const GlobalTip: React.FC = () => {
   useEffect(() => {
     tipRef = {
       add: (config) => {
-        const id = generateUniqueId(); // 🔧 使用唯一 ID 生成器
+        const id = generateUniqueId();
         const newToast = { ...config, id };
 
-        setToasts((prev) => [...prev, newToast]);
+        setToasts((prev) => {
+          // 🎯 限制最多显示3个提醒
+          const newToasts = [...prev, newToast];
+          return newToasts.slice(-3); // 只保留最后3个
+        });
 
         // 自动关闭逻辑
         if (config.duration !== 0) {
@@ -87,73 +91,114 @@ export const GlobalTip: React.FC = () => {
     setToasts((prev) => prev.filter((t) => t.id !== id));
   };
 
-  // 根据类型获取图标和颜色
+  // 🎨 根据类型获取卡通风格样式
   const getStyle = (type?: TipType) => {
     switch (type) {
       case 'success':
         return {
-          icon: <CheckCircle2 className="text-green-500" />,
-          border: 'border-green-500',
-          bg: 'bg-green-50',
+          icon: <CheckCircle2 className="text-white" size={24} />,
+          bg: 'bg-toon-blue',
+          iconBg: 'bg-toon-blue',
         };
       case 'error':
         return {
-          icon: <XCircle className="text-red-500" />,
-          border: 'border-red-500',
-          bg: 'bg-red-50',
+          icon: <XCircle className="text-white" size={24} />,
+          bg: 'bg-toon-red',
+          iconBg: 'bg-toon-red',
         };
       case 'warning':
         return {
-          icon: <AlertCircle className="text-yellow-500" />,
-          border: 'border-yellow-500',
-          bg: 'bg-yellow-50',
+          icon: <AlertCircle className="text-gray-900" size={24} />,
+          bg: 'bg-toon-yellow',
+          iconBg: 'bg-toon-yellow',
         };
       default:
         return {
-          icon: <Info className="text-blue-500" />,
-          border: 'border-blue-500',
-          bg: 'bg-blue-50',
+          icon: <Info className="text-white" size={24} />,
+          bg: 'bg-toon-purple',
+          iconBg: 'bg-toon-purple',
         };
     }
   };
 
   return (
-    <div className="fixed top-4 right-4 z-[9999] flex flex-col gap-3 pointer-events-none">
-      {toasts.map((toast) => {
-        const style = getStyle(toast.type);
+    <div className="fixed bottom-4 left-0 right-0 z-[9999] pointer-events-none px-2 sm:px-4">
+      <div className="max-w-4xl mx-auto flex flex-col gap-3">
+        {toasts.map((toast, index) => {
+          const style = getStyle(toast.type);
 
-        return (
-          <div
-            key={toast.id}
-            className={`
-              pointer-events-auto
-              min-w-[300px] max-w-sm
-              flex items-start gap-3 p-4
-              bg-white rounded-xl shadow-2xl
-              border-l-8 ${style.border}
-              transform transition-all duration-300 ease-in-out
-              animate-in slide-in-from-right-full fade-in
-            `}
-          >
-            <div className="mt-0.5 shrink-0">{style.icon}</div>
-
-            <div className="flex-1">
-              {toast.title && (
-                <h4 className="font-bold text-gray-800 text-sm mb-1">{toast.title}</h4>
-              )}
-              <p className="text-sm text-gray-600 font-medium leading-relaxed">{toast.message}</p>
-            </div>
-
-            <button
-              onClick={() => removeToast(toast.id)}
-              className="text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-full p-1 transition-colors"
-              aria-label="Close notification"
+          return (
+            <div
+              key={toast.id}
+              className="pointer-events-auto w-full animate-in slide-in-from-bottom-4 fade-in duration-300"
+              style={{ animationDelay: `${index * 50}ms` }}
             >
-              <X size={16} />
-            </button>
-          </div>
-        );
-      })}
+              <div
+                className={`
+                  flex items-center gap-3 sm:gap-4
+                  p-3 sm:p-4
+                  bg-white
+                  border-4 border-black
+                  rounded-2xl sm:rounded-3xl
+                  shadow-toon
+                  transition-all duration-300
+                  hover:shadow-toon-lg
+                  hover:-translate-y-1
+                `}
+              >
+                {/* 图标容器 */}
+                <div
+                  className={`
+                    ${style.iconBg}
+                    flex items-center justify-center
+                    w-12 h-12 sm:w-14 sm:h-14
+                    rounded-full
+                    border-3 border-black
+                    shadow-toon-sm
+                    flex-shrink-0
+                  `}
+                >
+                  {style.icon}
+                </div>
+
+                {/* 消息内容 */}
+                <div className="flex-1 min-w-0">
+                  {toast.title && (
+                    <h4 className="font-black text-gray-900 text-sm sm:text-base mb-1 truncate">
+                      {toast.title}
+                    </h4>
+                  )}
+                  <p className="text-xs sm:text-sm text-gray-700 font-bold leading-relaxed break-words">
+                    {toast.message}
+                  </p>
+                </div>
+
+                {/* 关闭按钮 */}
+                <button
+                  onClick={() => removeToast(toast.id)}
+                  className="
+                    flex items-center justify-center
+                    w-8 h-8 sm:w-10 sm:h-10
+                    bg-gray-100
+                    hover:bg-gray-900
+                    border-2 border-black
+                    rounded-full
+                    transition-all
+                    group
+                    flex-shrink-0
+                    shadow-toon-sm
+                    hover:shadow-toon
+                    active:scale-95
+                  "
+                  aria-label="Close notification"
+                >
+                  <X size={16} className="text-gray-900 group-hover:text-white sm:w-5 sm:h-5" />
+                </button>
+              </div>
+            </div>
+          );
+        })}
+      </div>
     </div>
   );
 };

@@ -30,7 +30,7 @@ export interface AuthContextType {
   logout: () => void;
 }
 
-export type Theme = 'cartoon' | 'cyberpunk' | 'chinese';
+export type Theme = 'cartoon' | 'chinese';
 
 export interface ThemeContextType {
   theme: Theme;
