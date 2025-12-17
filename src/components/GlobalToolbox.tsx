@@ -62,25 +62,9 @@ export const GlobalToolbox: React.FC = () => {
     return window.innerWidth < 640; // sm breakpoint
   };
 
-  // Init Audio - 自动播放第一首歌
   useEffect(() => {
     audioRef.current = new Audio(PLAYLIST[0].url);
     audioRef.current.addEventListener('ended', handleNextTrack);
-
-    // 尝试自动播放
-    const playPromise = audioRef.current.play();
-
-    if (playPromise !== undefined) {
-      playPromise
-        .then(() => {
-          setIsPlaying(true);
-          console.log('Auto-play started successfully');
-        })
-        .catch((error) => {
-          console.log('Auto-play was prevented by browser:', error);
-          setIsPlaying(false);
-        });
-    }
 
     return () => {
       audioRef.current?.pause();

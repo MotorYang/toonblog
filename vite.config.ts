@@ -4,28 +4,44 @@ import { defineConfig, loadEnv } from 'vite';
 
 // https://vitejs.dev/config/
 export default defineConfig(({ mode }) => {
-  // Load env file based on `mode` in the current working directory.
-  // Set the third parameter to '' to load all env regardless of the `VITE_` prefix.
+  // 加载环境变量
   const env = loadEnv(mode, process.cwd(), '');
+
   return {
     plugins: [react()],
+
     server: {
       port: 5174,
       proxy: {
         '/system': {
-          target: 'http://localhost:8888',
+          target: env.VITE_API_BASE_URL || 'http://localhost:8888',
           changeOrigin: true,
         },
       },
     },
+
     resolve: {
       alias: {
         '@': path.resolve(__dirname, './src'),
       },
     },
+
     define: {
-      // Shims process.env.API_KEY to work in the browser using Vite's env loading
+      // 如果需要兼容旧的 process.env 写法
       'process.env.API_KEY': JSON.stringify(env.API_KEY),
+    },
+
+    // 构建优化
+    build: {
+      outDir: 'dist',
+      sourcemap: mode !== 'production',
+      rollupOptions: {
+        output: {
+          manualChunks: {
+            'react-vendor': ['react', 'react-dom', 'react-router-dom'],
+          },
+        },
+      },
     },
   };
 });

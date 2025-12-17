@@ -118,13 +118,13 @@ export const Home: React.FC = () => {
           >
             <div className="bg-white border-3 border-black rounded-xl px-3 py-1.5 shadow-toon-sm">
               <div className="text-xl md:text-2xl font-black text-toon-blue">{posts.length}</div>
-              <div className="text-xs font-bold text-gray-600">文章</div>
+              <div className="text-xs font-bold text-gray-600">{t('home.count.article')}</div>
             </div>
             <div className="bg-white border-3 border-black rounded-xl px-3 py-1.5 shadow-toon-sm">
               <div className="text-xl md:text-2xl font-black text-toon-red">
                 {categories.length - 1}
               </div>
-              <div className="text-xs font-bold text-gray-600">分类</div>
+              <div className="text-xs font-bold text-gray-600">{t('home.count.category')}</div>
             </div>
           </div>
         </div>
@@ -164,7 +164,9 @@ export const Home: React.FC = () => {
             <div className="flex items-center gap-3 flex-wrap flex-1">
               <div className="flex items-center gap-2 flex-shrink-0">
                 <Tag size={18} className="text-gray-600" />
-                <span className="text-sm font-black text-gray-600 uppercase">分类筛选</span>
+                <span className="text-sm font-black text-gray-600 uppercase">
+                  {t('home.filter.category')}
+                </span>
               </div>
               <div className="flex flex-wrap gap-2">
                 {categories.map((cat, index) => (
@@ -200,7 +202,9 @@ export const Home: React.FC = () => {
                 title="切换排序"
               >
                 {sortOrder === 'desc' ? <ArrowDownAZ size={18} /> : <ArrowUpAZ size={18} />}
-                <span className="hidden sm:inline">{sortOrder === 'desc' ? '最新' : '最早'}</span>
+                <span className="hidden sm:inline">
+                  {sortOrder === 'desc' ? t('home.filter.latest') : t('home.filter.oldest')}
+                </span>
               </button>
 
               {/* 清除筛选按钮 */}

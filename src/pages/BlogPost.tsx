@@ -1,4 +1,4 @@
-import { ArrowLeft, Calendar, Eye, Loader2, Sparkles, Tag, Trash2, User } from 'lucide-react';
+import { ArrowLeft, Calendar, Eye, Sparkles, Tag, Trash2, User } from 'lucide-react';
 import React, { useEffect, useRef, useState } from 'react';
 import ReactMarkdown from 'react-markdown';
 import { useNavigate, useParams } from 'react-router-dom';
@@ -39,13 +39,10 @@ export const BlogPost: React.FC = () => {
     return (
       <div className="text-center py-20 animate-in fade-in scale-in duration-500">
         <div className="bg-gradient-to-br from-gray-100 to-white p-12 border-4 border-black rounded-2xl shadow-toon-lg inline-block">
-          <div className="bg-toon-red/20 p-6 border-3 border-black rounded-full inline-block mb-4">
-            <Eye size={48} className="text-toon-red" />
-          </div>
-          <h2 className="text-4xl font-black mb-3 text-gray-900">找不到文章！</h2>
-          <p className="mb-6 font-bold text-gray-600">该文章可能已被删除或不存在</p>
+          <h2 className="text-4xl font-black mb-3 text-gray-900">{t('post.unknown')}</h2>
+          <p className="mb-6 font-bold text-gray-600">{t('post.unknown.tip')}</p>
           <ToonButton onClick={() => navigate('/')}>
-            <ArrowLeft className="mr-2" size={20} /> 返回首页
+            <ArrowLeft className="mr-2" size={20} /> {t('post.unknown.back')}
           </ToonButton>
         </div>
       </div>
@@ -101,7 +98,7 @@ export const BlogPost: React.FC = () => {
 
           {/* Title - 优化标题 */}
           <h1
-            className="text-3xl md:text-6xl font-black mb-6 leading-tight break-words text-gray-900 animate-in fade-in slide-in-from-top-4 duration-500"
+            className="text-2xl md:text-4xl font-black mb-6 leading-tight break-words text-gray-900 animate-in fade-in slide-in-from-top-4 duration-500"
             style={{ animationDelay: '200ms' }}
           >
             {post.title}
@@ -109,20 +106,20 @@ export const BlogPost: React.FC = () => {
 
           {/* Meta Info - 重新设计元信息 */}
           <div
-            className="flex flex-wrap gap-3 mb-8 animate-in fade-in slide-in-from-left-4 duration-500"
+            className="flex flex-wrap gap-3 mb-5 animate-in fade-in slide-in-from-left-4 duration-500"
             style={{ animationDelay: '300ms' }}
           >
-            <span className="flex items-center gap-2 bg-gradient-to-r from-toon-yellow to-yellow-300 px-4 py-2 md:px-5 md:py-2.5 border-3 border-black rounded-xl font-black text-sm md:text-base shadow-toon-sm hover:shadow-toon transition-shadow">
+            <span className="flex items-center gap-2 bg-gradient-to-r from-toon-yellow to-yellow-300 px-4 py-2 md:px-4 md:py-2 border-2 border-black rounded-xl font-black text-sm md:text-base shadow-toon-sm hover:shadow-toon transition-shadow">
               <div className="bg-white border-2 border-black rounded-full p-1">
                 <User size={16} />
               </div>
               {post.author}
             </span>
-            <span className="flex items-center gap-2 bg-gradient-to-r from-toon-blue to-cyan-300 px-4 py-2 md:px-5 md:py-2.5 border-3 border-black rounded-xl font-black text-sm md:text-base shadow-toon-sm hover:shadow-toon transition-shadow text-white">
+            <span className="flex items-center gap-2 bg-gradient-to-r from-toon-blue to-cyan-300 px-4 py-2 md:px-5 md:py-2.5 border-2 border-black rounded-xl font-black text-sm md:text-base shadow-toon-sm hover:shadow-toon transition-shadow text-white">
               <Calendar size={16} />
               {post.date}
             </span>
-            <span className="flex items-center gap-2 bg-gradient-to-r from-white to-gray-100 px-4 py-2 md:px-5 md:py-2.5 border-3 border-black rounded-xl font-black text-sm md:text-base shadow-toon-sm hover:shadow-toon transition-shadow">
+            <span className="flex items-center gap-2 bg-gradient-to-r from-white to-gray-100 px-4 py-2 md:px-5 md:py-2.5 border-2 border-black rounded-xl font-black text-sm md:text-base shadow-toon-sm hover:shadow-toon transition-shadow">
               <Eye size={16} className="text-toon-purple" />
               {post.views?.toLocaleString()}
             </span>
@@ -171,14 +168,11 @@ export const BlogPost: React.FC = () => {
                     className="shadow-toon-sm hover:shadow-toon text-sm md:text-base"
                   >
                     {loadingSummary ? (
-                      <>
-                        <Loader2 size={16} className="animate-spin mr-2" />
-                        生成中...
-                      </>
+                      <>生成中...</>
                     ) : (
                       <>
                         <Sparkles size={16} className="mr-2" />
-                        {t('post.summarize')}
+                        {t('post.summarize.button')}
                       </>
                     )}
                   </ToonButton>
@@ -195,7 +189,7 @@ export const BlogPost: React.FC = () => {
               ) : (
                 <div className="bg-white/50 border-2 border-dashed border-black rounded-xl p-6 text-center">
                   <Sparkles size={32} className="mx-auto mb-2 text-gray-400" />
-                  <p className="text-sm font-bold text-gray-500">点击按钮生成 AI 摘要</p>
+                  <p className="text-sm font-bold text-gray-500">{t('post.summarize.tip')}</p>
                 </div>
               )}
             </ToonCard>
@@ -219,7 +213,7 @@ export const BlogPost: React.FC = () => {
             >
               <div className="flex items-center gap-2 text-sm font-bold text-gray-600">
                 <div className="w-2 h-2 bg-toon-red rounded-full animate-pulse"></div>
-                管理员操作区
+                {t('post.admin.area')}
               </div>
               <ToonButton
                 variant="danger"
