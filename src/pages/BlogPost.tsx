@@ -3,14 +3,14 @@ import React, { useEffect, useRef, useState } from 'react';
 import ReactMarkdown from 'react-markdown';
 import { useNavigate, useParams } from 'react-router-dom';
 
+import { AiApi } from '@/api/ai';
 import { ToonButton } from '@/components/ToonButton';
 import { ToonCard } from '@/components/ToonCard';
 import { ToonModal } from '@/components/ToonModal';
 import { useBlogStore } from '@/context/BlogContext';
 import { useLanguage } from '@/context/LanguageContext';
 import { userAuthStore } from '@/stores/userAuthStore.ts';
-
-import { generateSummary } from '../services/geminiService.ts';
+import { SummaryResponse } from '@/types/ai.ts';
 
 export const BlogPost: React.FC = () => {
   const { id } = useParams<{ id: string }>();
@@ -58,8 +58,11 @@ export const BlogPost: React.FC = () => {
   const handleGenerateSummary = async () => {
     setLoadingSummary(true);
     try {
-      const result = await generateSummary(post.content, language);
-      setSummary(result);
+      const result: SummaryResponse = await AiApi.generateSummary({
+        content: post.content,
+        lang: language,
+      });
+      setSummary(result.summary);
     } catch {
       alert('Could not generate summary. Check API Key.');
     } finally {

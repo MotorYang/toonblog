@@ -3,15 +3,16 @@ import React, { useEffect, useRef, useState } from 'react';
 import ReactMarkdown from 'react-markdown';
 import { useNavigate } from 'react-router-dom';
 
+import { AiApi } from '@/api/ai';
 import { ToonButton } from '@/components/ToonButton';
 import { ToonCard } from '@/components/ToonCard';
 import { ToonModal } from '@/components/ToonModal';
 import { useBlogStore } from '@/context/BlogContext';
 import { useLanguage } from '@/context/LanguageContext';
 import { userAuthStore } from '@/stores/userAuthStore.ts';
+import { GenerateContentResponse } from '@/types/ai.ts';
 
 import { Article } from '../../types.ts';
-import { generateBlogContent } from '../services/geminiService.ts';
 
 export const CreatePost: React.FC = () => {
   const navigate = useNavigate();
@@ -83,13 +84,14 @@ export const CreatePost: React.FC = () => {
     setIsGenerating(true);
     setActiveTab('write');
     try {
-      const generatedContent = await generateBlogContent(
-        title,
-        'Make it funny and cartoonish. Use Markdown formatting like **bold**, ## Headings, and bullet points.',
-        language,
-      );
-      setContent(generatedContent);
-      setExcerpt(generatedContent.substring(0, 100) + '...');
+      const generatedContent: GenerateContentResponse = await AiApi.generateBlogContent({
+        title: title,
+        content:
+          'Make it funny and cartoonish. Use Markdown formatting like **bold**, ## Headings, and bullet points.',
+        lang: language,
+      });
+      setContent(generatedContent.content);
+      setExcerpt(generatedContent.content.substring(0, 100) + '...');
     } catch {
       alert('AI Writing failed. Ensure API KEY is set.');
     } finally {
