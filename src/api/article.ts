@@ -1,10 +1,59 @@
-import { Article } from '@/types/article.ts';
+import { Article, ArticleCreateDTO } from '@/types/article.ts'; // 假设你有一个 http 工具类
 import http from '@/utils/request/http';
 
+/**
+ * Article API
+ */
 export const ArticleApi = {
-  getBlogPosts: (postId: string): Promise<Article> =>
-    http.get('/api/blogPosts', { params: { id: postId } }),
+  /**
+   * 获取所有文章
+   * GET /articles/all
+   */
+  getAllArticles: (): Promise<Article[]> => http.get('/cartoon/articles/all'),
 
-  getBlogPostsByType: (type: string): Promise<Article[]> =>
-    http.get('/api/blogPostsByType', { params: { type: type } }),
+  /**
+   * 根据ID获取文章
+   * GET /articles/get/{id}
+   */
+  getArticleById: (id: string): Promise<Article> => http.get(`/cartoon/articles/get/${id}`),
+
+  /**
+   * 创建新文章
+   * POST /articles/create
+   */
+  createArticle: (article: ArticleCreateDTO): Promise<Article> =>
+    http.post('/cartoon/articles/create', article),
+
+  /**
+   * 删除文章
+   * DELETE /articles/del/{id}
+   */
+  deleteArticle: (id: string): Promise<void> => http.delete(`/cartoon/articles/del/${id}`),
+
+  /**
+   * 增加文章浏览量
+   * POST /articles/views/{id}
+   */
+  incrementViews: (id: string): Promise<number> => http.post(`/cartoon/articles/views/${id}`),
+
+  /**
+   * 按分类获取文章
+   * GET /articles/category/{category}
+   */
+  getArticlesByCategory: (category: string): Promise<Article[]> =>
+    http.get(`/cartoon/articles/category/${category}`),
+
+  /**
+   * 按作者获取文章
+   * GET /articles/author/{author}
+   */
+  getArticlesByAuthor: (author: string): Promise<Article[]> =>
+    http.get(`/cartoon/articles/author/${author}`),
+
+  /**
+   * 搜索文章
+   * GET /articles/search?keyword={keyword}
+   */
+  searchArticles: (keyword: string): Promise<Article[]> =>
+    http.get('/cartoon/articles/search', { params: { keyword } }),
 };
