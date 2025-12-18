@@ -1,4 +1,4 @@
-import { ChevronDown, ChevronUp, List, Minus } from 'lucide-react';
+import { ChevronDown, ChevronLeft, ChevronRight, ChevronUp, List, Minus } from 'lucide-react';
 import React, { useEffect, useState } from 'react';
 
 interface Heading {
@@ -17,6 +17,29 @@ export const TableOfContents: React.FC<TableOfContentsProps> = ({ content }) => 
   const [isOpen, setIsOpen] = useState(false);
   const [isCollapsed, setIsCollapsed] = useState(false);
   const [collapsedLevels, setCollapsedLevels] = useState<Set<number>>(new Set());
+  const [isScrolling, setIsScrolling] = useState(false);
+  const scrollTimeoutRef = React.useRef<NodeJS.Timeout | null>(null);
+
+  // 从 localStorage 读取侧边栏是否隐藏的状态
+  const [isSidebarHidden, setIsSidebarHidden] = useState(() => {
+    try {
+      const saved = localStorage.getItem('toc-sidebar-hidden');
+      return saved === 'true';
+    } catch {
+      return false;
+    }
+  });
+
+  // 保存侧边栏状态到 localStorage
+  const toggleSidebar = () => {
+    const newState = !isSidebarHidden;
+    setIsSidebarHidden(newState);
+    try {
+      localStorage.setItem('toc-sidebar-hidden', String(newState));
+    } catch {
+      // localStorage 不可用时忽略错误
+    }
+  };
 
   useEffect(() => {
     // 从 Markdown 内容中提取标题
@@ -58,17 +81,65 @@ export const TableOfContents: React.FC<TableOfContentsProps> = ({ content }) => 
 
   useEffect(() => {
     const handleScroll = () => {
-      const headingElements = headings.map((h) => document.getElementById(h.id)).filter(Boolean);
+      // 如果是用户点击触发的滚动，等待滚动完成后再更新
+      if (isScrolling) {
+        return;
+      }
 
-      for (let i = headingElements.length - 1; i >= 0; i--) {
-        const element = headingElements[i];
+      const headingElements = headings
+        .map((h) => document.getElementById(h.id))
+        .filter((el): el is HTMLElement => el !== null);
+
+      // 查找 sticky header
+      const header = document.querySelector('header.sticky') as HTMLElement | null;
+      let headerHeight = 0;
+
+      if (header) {
+        // 获取 header 的实际高度（包括 padding 和 border）
+        headerHeight = header.offsetHeight;
+      } else {
+        // 如果找不到 header，使用估算值
+        // 移动端约 60px，桌面端约 80px
+        headerHeight = window.innerWidth >= 768 ? 80 : 60;
+      }
+
+      // 滚动偏移量 = 头部高度 + 额外间距（让标题不要紧贴头部）
+      const scrollOffset = headerHeight + 16;
+      const tolerance = 30; // 容差范围
+
+      // 找到最接近目标位置的标题
+      let closestHeading = null;
+      let closestDistance = Infinity;
+
+      for (const element of headingElements) {
         if (element) {
           const rect = element.getBoundingClientRect();
-          if (rect.top <= 100) {
-            setActiveId(element.id);
-            break;
+          const distance = Math.abs(rect.top - scrollOffset);
+
+          // 标题必须在头部下方，且在合理范围内
+          if (rect.top >= headerHeight - tolerance && distance < closestDistance) {
+            closestDistance = distance;
+            closestHeading = element;
           }
         }
+      }
+
+      // 如果没有找到合适的，使用传统方法：找到最后一个在偏移位置之上的标题
+      if (!closestHeading) {
+        for (let i = headingElements.length - 1; i >= 0; i--) {
+          const element = headingElements[i];
+          if (element) {
+            const rect = element.getBoundingClientRect();
+            if (rect.top <= scrollOffset) {
+              closestHeading = element;
+              break;
+            }
+          }
+        }
+      }
+
+      if (closestHeading && closestHeading.id !== activeId) {
+        setActiveId(closestHeading.id);
       }
     };
 
@@ -76,13 +147,41 @@ export const TableOfContents: React.FC<TableOfContentsProps> = ({ content }) => 
     handleScroll();
 
     return () => window.removeEventListener('scroll', handleScroll);
-  }, [headings]);
+  }, [headings, isScrolling, activeId]);
 
   const handleClick = (id: string) => {
     const element = document.getElementById(id);
     if (element) {
-      const top = element.offsetTop - 80;
+      // 清除之前的定时器
+      if (scrollTimeoutRef.current) {
+        clearTimeout(scrollTimeoutRef.current);
+      }
+
+      // 立即设置激活状态和滚动标志
+      setActiveId(id);
+      setIsScrolling(true);
+
+      // 查找 sticky header
+      const header = document.querySelector('header.sticky') as HTMLElement | null;
+      let headerHeight = 0;
+
+      if (header) {
+        // 获取 header 的实际高度（包括 padding 和 border）
+        headerHeight = header.offsetHeight;
+      } else {
+        // 如果找不到 header，使用估算值
+        headerHeight = window.innerWidth >= 768 ? 80 : 60;
+      }
+
+      // 使用与激活检测相同的偏移量
+      const scrollOffset = headerHeight + 16;
+      const top = element.offsetTop - scrollOffset;
       window.scrollTo({ top, behavior: 'smooth' });
+
+      // 滚动完成后重置标志（smooth滚动通常在1秒内完成）
+      scrollTimeoutRef.current = setTimeout(() => {
+        setIsScrolling(false);
+      }, 1000);
     }
     setIsOpen(false);
   };
@@ -184,17 +283,33 @@ export const TableOfContents: React.FC<TableOfContentsProps> = ({ content }) => 
       )}
 
       {/* 桌面端左侧边栏 */}
-      <aside className="hidden lg:block fixed left-0 rounded-xl top-32 w-64 max-h-[calc(100vh-200px)] overflow-hidden">
-        <nav className="bg-white border-3 border-black rounded-xl shadow-toon flex flex-col max-h-full">
+      <aside
+        className={`hidden lg:block fixed rounded-xl top-32 bottom-8 transition-all duration-300 ease-in-out ${
+          isSidebarHidden ? '-left-64' : 'left-0'
+        }`}
+        style={{ width: '256px' }}
+      >
+        <nav className="bg-white border-3 border-black rounded-xl shadow-toon flex flex-col h-full">
           {/* 标题栏 */}
           <div className="p-4 border-b-2 border-black flex items-center justify-between flex-shrink-0">
-            <h4 className="font-black text-base flex items-center gap-2">
-              <List size={18} />
-              目录
-              <span className="text-xs font-bold bg-white px-2 py-0.5 rounded-full border-2 border-black">
-                {headings.length}
-              </span>
-            </h4>
+            <div className="flex items-center gap-2 flex-1">
+              {/* 折叠/展开按钮 - 替代 List 图标位置 */}
+              <button
+                onClick={toggleSidebar}
+                className="p-1 hover:bg-gray-100 rounded transition-colors"
+                title="收起目录"
+              >
+                <ChevronLeft size={18} />
+              </button>
+
+              <h4 className="font-black text-base flex items-center gap-2">
+                目录
+                <span className="text-xs font-bold bg-white px-2 py-0.5 rounded-full border-2 border-black">
+                  {headings.length}
+                </span>
+              </h4>
+            </div>
+
             <button
               onClick={() => setIsCollapsed(!isCollapsed)}
               className="p-1 hover:bg-white/50 rounded transition-colors"
@@ -207,7 +322,7 @@ export const TableOfContents: React.FC<TableOfContentsProps> = ({ content }) => 
           {/* 目录内容 */}
           {!isCollapsed && (
             <div className="overflow-y-auto overflow-x-hidden flex-1 p-3 scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-transparent hover:scrollbar-thumb-gray-400">
-              <div className="space-y-0.5">
+              <div className="space-y-0.5 pb-2">
                 {headings.map((heading, index) => {
                   if (!shouldShowHeading(heading, index)) return null;
 
@@ -278,6 +393,17 @@ export const TableOfContents: React.FC<TableOfContentsProps> = ({ content }) => 
           )}
         </nav>
       </aside>
+
+      {/* 展开按钮 - 当侧边栏隐藏时显示在屏幕左侧边缘 */}
+      {isSidebarHidden && (
+        <button
+          onClick={toggleSidebar}
+          className="hidden lg:flex fixed left-0 top-32 z-50 items-center justify-center w-10 h-16 bg-white border-2 border-l-0 border-black rounded-r-xl shadow-toon hover:shadow-toon-lg hover:w-12 transition-all duration-300"
+          title="展开目录"
+        >
+          <ChevronRight size={20} />
+        </button>
+      )}
 
       {/* 添加自定义滚动条样式 */}
       <style>{`
