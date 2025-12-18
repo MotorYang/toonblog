@@ -16,6 +16,7 @@ import { Link } from 'react-router-dom';
 import { ToonCard } from '@/components/ToonCard';
 import { useBlogStore } from '@/context/BlogContext';
 import { useLanguage } from '@/context/LanguageContext';
+import { formatDate } from '@/utils/common';
 
 const PAGE_SIZE = 6;
 
@@ -24,23 +25,37 @@ export const Home: React.FC = () => {
   const { t } = useLanguage();
 
   // State for filters, sorting, and pagination
-  const [selectedCategory, setSelectedCategory] = useState<string>('All');
+  const [selectedCategory, setSelectedCategory] = useState<string>('all');
   const [searchQuery, setSearchQuery] = useState<string>('');
   const [sortOrder, setSortOrder] = useState<'desc' | 'asc'>('desc');
   const [currentPage, setCurrentPage] = useState<number>(1);
 
+  // Category configuration - same as CreatePost
+  const categoryConfig = [
+    { value: 'tech', emoji: '💻', color: 'bg-toon-blue' },
+    { value: 'life', emoji: '🌱', color: 'bg-toon-yellow' },
+    { value: 'trip', emoji: '🏍️', color: 'bg-toon-purple' },
+    { value: 'food', emoji: '🍕', color: 'bg-toon-red' },
+    { value: 'random', emoji: '🎲', color: 'bg-gray-400' },
+  ];
+
   // Extract unique categories from posts
   const categories = useMemo(() => {
-    const uniqueTags = new Set(posts.map((post) => post.category));
-    return ['All', ...Array.from(uniqueTags)];
+    const uniqueCategories = new Set(posts.map((post) => post.category));
+    return ['all', ...Array.from(uniqueCategories)];
   }, [posts]);
+
+  // Get category config by value
+  const getCategoryConfig = (value: string) => {
+    return categoryConfig.find((cat) => cat.value === value);
+  };
 
   // 1. Filter and Sort Logic (Get all matching results first)
   const allMatchingPosts = useMemo(() => {
     let result = [...posts];
 
     // Filter by Category
-    if (selectedCategory !== 'All') {
+    if (selectedCategory !== 'all') {
       result = result.filter((post) => post.category === selectedCategory);
     }
 
@@ -83,12 +98,12 @@ export const Home: React.FC = () => {
   }, [currentPage]);
 
   const clearFilters = () => {
-    setSelectedCategory('All');
+    setSelectedCategory('all');
     setSearchQuery('');
     setSortOrder('desc');
   };
 
-  const hasActiveFilters = selectedCategory !== 'All' || searchQuery !== '';
+  const hasActiveFilters = selectedCategory !== 'all' || searchQuery !== '';
 
   return (
     <div className="space-y-6 md:space-y-8 pb-12">
@@ -109,23 +124,6 @@ export const Home: React.FC = () => {
             <p className="text-sm md:text-lg font-bold bg-gradient-to-r from-toon-yellow to-yellow-300 border-4 border-black inline-block px-4 py-2 md:px-5 md:py-2.5 rounded-2xl shadow-toon transform -rotate-2 hover:rotate-0 transition-transform duration-300 text-gray-900">
               {t('home.subtitle')}
             </p>
-          </div>
-
-          {/* 统计信息 */}
-          <div
-            className="flex justify-center gap-4 md:gap-6 mt-4 animate-in fade-in slide-in-from-bottom-4 duration-700"
-            style={{ animationDelay: '300ms' }}
-          >
-            <div className="bg-white border-3 border-black rounded-xl px-3 py-1.5 shadow-toon-sm">
-              <div className="text-xl md:text-2xl font-black text-toon-blue">{posts.length}</div>
-              <div className="text-xs font-bold text-gray-600">{t('home.count.article')}</div>
-            </div>
-            <div className="bg-white border-3 border-black rounded-xl px-3 py-1.5 shadow-toon-sm">
-              <div className="text-xl md:text-2xl font-black text-toon-red">
-                {categories.length - 1}
-              </div>
-              <div className="text-xs font-bold text-gray-600">{t('home.count.category')}</div>
-            </div>
           </div>
         </div>
       </section>
@@ -169,27 +167,32 @@ export const Home: React.FC = () => {
                 </span>
               </div>
               <div className="flex flex-wrap gap-2">
-                {categories.map((cat, index) => (
-                  <button
-                    key={cat}
-                    onClick={() => setSelectedCategory(cat)}
-                    className={`
-                      px-4 py-2 font-black border-3 border-black rounded-xl transition-all text-sm md:text-base
-                      animate-in fade-in slide-in-from-bottom-2 duration-300
-                      ${
-                        selectedCategory === cat
-                          ? 'bg-toon-yellow text-gray-900 shadow-toon hover:shadow-toon-lg scale-105'
-                          : 'bg-white hover:bg-gray-100 text-gray-900 shadow-toon-sm hover:shadow-toon'
-                      }
-                    `}
-                    style={{ animationDelay: `${index * 50}ms` }}
-                  >
-                    {cat}
-                    {selectedCategory === cat && (
-                      <span className="ml-2 inline-block w-2 h-2 bg-gray-900 rounded-full animate-pulse"></span>
-                    )}
-                  </button>
-                ))}
+                {categories.map((cat, index) => {
+                  const config = getCategoryConfig(cat);
+                  const isAll = cat === 'all';
+
+                  return (
+                    <button
+                      key={cat}
+                      onClick={() => setSelectedCategory(cat)}
+                      className={`
+                        px-4 py-2 font-black border-3 border-black rounded-xl transition-all text-sm md:text-base
+                        animate-in fade-in slide-in-from-bottom-2 duration-300
+                        ${
+                          selectedCategory === cat
+                            ? `${isAll ? 'bg-toon-yellow' : config?.color || 'bg-toon-yellow'} text-gray-900 shadow-toon hover:shadow-toon-lg scale-105`
+                            : 'bg-white hover:bg-gray-100 text-gray-900 shadow-toon-sm hover:shadow-toon'
+                        }
+                      `}
+                      style={{ animationDelay: `${index * 50}ms` }}
+                    >
+                      {isAll ? t('home.filter.all') : t(`category.${cat}`)}
+                      {selectedCategory === cat && (
+                        <span className="ml-2 inline-block w-2 h-2 bg-gray-900 rounded-full animate-pulse"></span>
+                      )}
+                    </button>
+                  );
+                })}
               </div>
             </div>
 
@@ -226,7 +229,7 @@ export const Home: React.FC = () => {
           <div className="bg-toon-yellow/20 border-2 border-toon-yellow rounded-lg px-4 py-2 flex items-center gap-2 animate-in fade-in slide-in-from-top-2 duration-300">
             <Sparkles size={16} className="text-toon-yellow flex-shrink-0" />
             <span className="text-sm font-bold text-gray-900">
-              找到 <span className="text-toon-blue text-lg">{allMatchingPosts.length}</span> 个结果
+              {t('home.results_found').replace('{count}', String(allMatchingPosts.length))}
             </span>
           </div>
         )}
@@ -236,71 +239,76 @@ export const Home: React.FC = () => {
       {paginatedPosts.length > 0 ? (
         <>
           <div className="grid gap-6 md:grid-cols-2">
-            {paginatedPosts.map((post, index) => (
-              <Link
-                to={`/post/${post.id}`}
-                key={post.id}
-                className="animate-in fade-in slide-in-from-bottom-4 duration-500"
-                style={{ animationDelay: `${index * 100}ms` }}
-              >
-                <ToonCard
-                  hoverEffect
-                  color={index % 3 === 0 ? 'white' : index % 3 === 1 ? 'yellow' : 'blue'}
-                  className="h-full flex flex-col group"
+            {paginatedPosts.map((post, index) => {
+              const categoryConf = getCategoryConfig(post.category);
+
+              return (
+                <Link
+                  to={`/post/${post.id}`}
+                  key={post.id}
+                  className="animate-in fade-in slide-in-from-bottom-4 duration-500"
+                  style={{ animationDelay: `${index * 100}ms` }}
                 >
-                  {/* 图片容器 - 增强悬停效果 */}
-                  {post.imageUrl && (
-                    <div className="mb-4 border-3 border-black rounded-xl overflow-hidden h-48 md:h-56 bg-gray-200 relative">
-                      <img
-                        src={post.imageUrl}
-                        alt={post.title}
-                        className="w-full h-full object-cover transition-all duration-500 group-hover:scale-110 group-hover:rotate-2"
-                      />
-                      {/* 悬停遮罩 */}
-                      <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors duration-300"></div>
-                    </div>
-                  )}
-
-                  {/* 标签行 - 优化样式 */}
-                  <div className="flex gap-2 mb-3 flex-wrap">
-                    <span className="bg-gradient-to-r from-gray-900 to-gray-700 text-white px-3 py-1 rounded-lg text-xs font-black border-2 border-black uppercase tracking-wider shadow-toon-sm">
-                      {post.category}
-                    </span>
-                    {post.tags.slice(0, 2).map((tag) => (
-                      <span
-                        key={tag}
-                        className="bg-white text-gray-900 px-3 py-1 rounded-lg text-xs font-bold border-2 border-black flex items-center gap-1 shadow-toon-sm hover:shadow-toon transition-shadow"
-                      >
-                        <Tag size={12} /> {tag}
-                      </span>
-                    ))}
-                  </div>
-
-                  {/* 标题 - 修复绿色背景下的可见性问题 */}
-                  <h2 className="text-xl md:text-2xl font-black mb-3 leading-tight group-hover:drop-shadow-[2px_2px_0px_rgba(255,217,61,0.8)] transition-all duration-300">
-                    {post.title}
-                  </h2>
-
-                  {/* 摘要 */}
-                  <p className="font-medium mb-4 flex-grow line-clamp-3 text-sm md:text-base text-gray-700 leading-relaxed">
-                    {post.excerpt}
-                  </p>
-
-                  {/* 元信息 - 优化布局 */}
-                  <div className="mt-auto flex items-center justify-between text-xs md:text-sm font-bold border-t-3 border-black pt-4">
-                    <div className="flex items-center gap-2 text-gray-700">
-                      <div className="w-6 h-6 bg-toon-purple rounded-full border-2 border-black flex items-center justify-center">
-                        <User size={14} className="text-white" />
+                  <ToonCard
+                    hoverEffect
+                    color={index % 3 === 0 ? 'white' : index % 3 === 1 ? 'yellow' : 'blue'}
+                    className="h-full flex flex-col group"
+                  >
+                    {/* 图片容器 - 增强悬停效果 */}
+                    {post.imageUrl && (
+                      <div className="mb-4 border-3 border-black rounded-xl overflow-hidden h-48 md:h-56 bg-gray-200 relative">
+                        <img
+                          src={post.imageUrl}
+                          alt={post.title}
+                          className="w-full h-full object-cover transition-all duration-500 group-hover:scale-110 group-hover:rotate-2"
+                        />
+                        {/* 悬停遮罩 */}
+                        <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors duration-300"></div>
                       </div>
-                      {post.author}
+                    )}
+
+                    {/* 标签行 - 优化样式，使用翻译 */}
+                    <div className="flex gap-2 mb-3 flex-wrap">
+                      <span className="bg-gradient-to-r from-gray-900 to-gray-700 text-white px-3 py-1 rounded-lg text-xs font-black border-2 border-black uppercase tracking-wider shadow-toon-sm flex items-center gap-1">
+                        {categoryConf?.emoji && <span>{categoryConf.emoji}</span>}
+                        {t(`category.${post.category}`)}
+                      </span>
+                      {post.tags.slice(0, 2).map((tag) => (
+                        <span
+                          key={tag}
+                          className="bg-white text-gray-900 px-3 py-1 rounded-lg text-xs font-bold border-2 border-black flex items-center gap-1 shadow-toon-sm hover:shadow-toon transition-shadow"
+                        >
+                          <Tag size={12} /> {tag}
+                        </span>
+                      ))}
                     </div>
-                    <div className="flex items-center gap-2 text-gray-600">
-                      <Calendar size={14} /> {post.date}
+
+                    {/* 标题 - 修复绿色背景下的可见性问题 */}
+                    <h2 className="text-xl md:text-2xl font-black mb-3 leading-tight group-hover:drop-shadow-[2px_2px_0px_rgba(255,217,61,0.8)] transition-all duration-300">
+                      {post.title}
+                    </h2>
+
+                    {/* 摘要 */}
+                    <p className="font-medium mb-4 flex-grow line-clamp-3 text-sm md:text-base text-gray-700 leading-relaxed">
+                      {post.excerpt}
+                    </p>
+
+                    {/* 元信息 - 优化布局 */}
+                    <div className="mt-auto flex items-center justify-between text-xs md:text-sm font-bold border-t-3 border-black pt-4">
+                      <div className="flex items-center gap-2 text-gray-700">
+                        <div className="w-6 h-6 bg-toon-purple rounded-full border-2 border-black flex items-center justify-center">
+                          <User size={14} className="text-white" />
+                        </div>
+                        {post.author}
+                      </div>
+                      <div className="flex items-center gap-2 text-gray-600">
+                        <Calendar size={14} /> {formatDate(post.date)}
+                      </div>
                     </div>
-                  </div>
-                </ToonCard>
-              </Link>
-            ))}
+                  </ToonCard>
+                </Link>
+              );
+            })}
           </div>
 
           {/* Pagination Controls - 优化样式 */}
@@ -338,7 +346,9 @@ export const Home: React.FC = () => {
           </div>
           <h3 className="text-2xl md:text-3xl font-black mb-3">{t('home.no_results')}</h3>
           <p className="font-bold text-gray-600 mb-6 max-w-md mx-auto">
-            {searchQuery ? `找不到包含 "${searchQuery}" 的文章` : t('home.no_results_desc')}
+            {searchQuery
+              ? t('home.no_results_search').replace('{query}', searchQuery)
+              : t('home.no_results_desc')}
           </p>
           <button
             onClick={clearFilters}

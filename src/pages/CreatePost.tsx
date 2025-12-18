@@ -1,4 +1,16 @@
-import { Edit3, Eye, Loader2, Lock, Save, Sparkles, Upload, Wand2, X } from 'lucide-react';
+import {
+  Edit3,
+  Eye,
+  Loader2,
+  Lock,
+  Plus,
+  Save,
+  Sparkles,
+  Tag,
+  Upload,
+  Wand2,
+  X,
+} from 'lucide-react';
 import React, { useEffect, useRef, useState } from 'react';
 import ReactMarkdown from 'react-markdown';
 import { useNavigate } from 'react-router-dom';
@@ -23,11 +35,13 @@ export const CreatePost: React.FC = () => {
   const [title, setTitle] = useState('');
   const [content, setContent] = useState('');
   const [excerpt, setExcerpt] = useState('');
-  const [category, setCategory] = useState('Tech');
+  const [category, setCategory] = useState('tech');
   const [coverImage, setCoverImage] = useState<string>('');
   const [isGenerating, setIsGenerating] = useState(false);
   const [activeTab, setActiveTab] = useState<'write' | 'preview'>('write');
   const [isOverwriteModalOpen, setIsOverwriteModalOpen] = useState(false);
+  const [tags, setTags] = useState<string[]>([]);
+  const [tagInput, setTagInput] = useState('');
 
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -66,6 +80,25 @@ export const CreatePost: React.FC = () => {
     setCoverImage('');
     if (fileInputRef.current) {
       fileInputRef.current.value = '';
+    }
+  };
+
+  const addTag = () => {
+    const trimmedTag = tagInput.trim();
+    if (trimmedTag && !tags.includes(trimmedTag)) {
+      setTags([...tags, trimmedTag]);
+      setTagInput('');
+    }
+  };
+
+  const removeTag = (tagToRemove: string) => {
+    setTags(tags.filter((tag) => tag !== tagToRemove));
+  };
+
+  const handleTagInputKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      addTag();
     }
   };
 
@@ -109,10 +142,13 @@ export const CreatePost: React.FC = () => {
       content,
       excerpt: excerpt || content.substring(0, 100) + '...',
       author: 'Admin',
-      date: new Date().toISOString().split('T')[0],
+      date: new Date().toISOString(),
       category,
       imageUrl: coverImage || `https://picsum.photos/800/400?random=${Date.now()}`,
-      tags: ['New', category],
+      tags:
+        tags.length > 0
+          ? [...tags, t('create.tag_new')]
+          : [t('create.tag_new'), t(`category.${category}`)],
       views: 0,
     };
 
@@ -120,9 +156,17 @@ export const CreatePost: React.FC = () => {
     navigate('/');
   };
 
+  const categories = [
+    { value: 'tech', emoji: '💻', color: 'bg-toon-blue' },
+    { value: 'life', emoji: '🌱', color: 'bg-toon-yellow' },
+    { value: 'trip', emoji: '🏍️', color: 'bg-toon-purple' },
+    { value: 'food', emoji: '🍕', color: 'bg-toon-red' },
+    { value: 'random', emoji: '🎲', color: 'bg-gray-400' },
+  ];
+
   return (
     <div className="max-w-3xl mx-auto pb-12">
-      {/* Header - 优化标题区域 */}
+      {/* Header */}
       <div className="mb-6 md:mb-8 text-center animate-in fade-in slide-in-from-top-4 duration-500">
         <h1 className="text-3xl md:text-5xl font-black mb-2 text-gray-900">{t('create.title')}</h1>
         <p className="text-sm md:text-base font-bold text-gray-600">{t('create.subtitle')}</p>
@@ -134,7 +178,7 @@ export const CreatePost: React.FC = () => {
       >
         <ToonCard color="white" className="shadow-toon-lg">
           <form onSubmit={handleSubmit} className="space-y-6">
-            {/* Image Upload - 优化样式 */}
+            {/* Image Upload */}
             <div className="space-y-3">
               <label className="flex items-center gap-2 font-black text-lg md:text-xl text-gray-900">
                 <div className="w-1 h-6 bg-toon-purple rounded-full"></div>
@@ -179,7 +223,7 @@ export const CreatePost: React.FC = () => {
               )}
             </div>
 
-            {/* Title Input - 优化样式 */}
+            {/* Title Input */}
             <div>
               <label className="flex items-center gap-2 font-black text-lg md:text-xl mb-3 text-gray-900">
                 <div className="w-1 h-6 bg-toon-blue rounded-full"></div>
@@ -194,26 +238,128 @@ export const CreatePost: React.FC = () => {
               />
             </div>
 
-            {/* Category - 优化样式 */}
+            {/* Category - Pills Only */}
             <div>
               <label className="flex items-center gap-2 font-black text-lg md:text-xl mb-3 text-gray-900">
                 <div className="w-1 h-6 bg-toon-red rounded-full"></div>
                 {t('create.category')}
               </label>
-              <select
-                value={category}
-                onChange={(e) => setCategory(e.target.value)}
-                className="w-full border-4 border-black rounded-xl p-3 md:p-4 font-bold focus:outline-none focus:border-toon-red focus:shadow-toon-lg transition-all bg-white text-base md:text-lg"
-              >
-                <option>Tech</option>
-                <option>Life</option>
-                <option>Art</option>
-                <option>Food</option>
-                <option>Random</option>
-              </select>
+
+              {/* Category Pills */}
+              <div className="flex flex-wrap gap-2 md:gap-3">
+                {categories.map((cat) => (
+                  <button
+                    key={cat.value}
+                    type="button"
+                    onClick={() => setCategory(cat.value)}
+                    className={`
+                      px-5 md:px-6 py-3 md:py-3.5 border-4 border-black rounded-full font-black text-sm md:text-base
+                      transition-all hover:scale-105 active:scale-95
+                      ${
+                        category === cat.value
+                          ? `${cat.color} shadow-toon-lg scale-105`
+                          : 'bg-white hover:bg-gray-50 shadow-toon'
+                      }
+                    `}
+                  >
+                    <span className="mr-1.5 text-lg">{cat.emoji}</span>
+                    {t(`category.${cat.value}`)}
+                  </button>
+                ))}
+              </div>
             </div>
 
-            {/* Content Editor - 重新设计 */}
+            {/* Tags Input - New Feature */}
+            <div>
+              <label className="flex items-center gap-2 font-black text-lg md:text-xl mb-3 text-gray-900">
+                <div className="w-1 h-6 bg-toon-yellow rounded-full"></div>
+                <Tag size={20} /> {t('create.tags')}
+              </label>
+
+              {/* Tag Input */}
+              <div className="flex gap-2 mb-3">
+                <input
+                  type="text"
+                  value={tagInput}
+                  onChange={(e) => setTagInput(e.target.value)}
+                  onKeyDown={handleTagInputKeyDown}
+                  className="flex-1 border-4 border-black rounded-xl p-3 font-bold focus:outline-none focus:border-toon-yellow focus:shadow-toon-lg transition-all bg-white"
+                  placeholder={t('create.tags_placeholder')}
+                />
+                <button
+                  type="button"
+                  onClick={addTag}
+                  className="bg-toon-yellow border-4 border-black rounded-xl px-4 py-3 font-black hover:bg-yellow-300 hover:shadow-toon-lg active:scale-95 transition-all flex items-center gap-2"
+                >
+                  <Plus size={20} /> {t('create.tags_add')}
+                </button>
+              </div>
+
+              {/* Tags Display */}
+              <div className="flex flex-wrap gap-2 min-h-[3rem] p-4 border-4 border-dashed border-gray-300 rounded-xl bg-gray-50">
+                {tags.length === 0 ? (
+                  <div className="w-full text-center text-gray-400 font-bold italic py-2">
+                    {t('create.tags_empty')}
+                  </div>
+                ) : (
+                  tags.map((tag, index) => (
+                    <div
+                      key={index}
+                      className="group relative bg-gradient-to-r from-toon-yellow to-yellow-300 border-3 border-black rounded-full px-4 py-2 font-black text-sm shadow-toon hover:shadow-toon-lg transition-all flex items-center gap-2 animate-in zoom-in duration-200"
+                      style={{ animationDelay: `${index * 50}ms` }}
+                    >
+                      <Tag size={14} />
+                      {tag}
+                      <button
+                        type="button"
+                        onClick={() => removeTag(tag)}
+                        className="ml-1 hover:bg-toon-red hover:text-white rounded-full p-1 transition-all"
+                      >
+                        <X size={14} />
+                      </button>
+                    </div>
+                  ))
+                )}
+              </div>
+
+              {/* Quick Tags */}
+              <div className="mt-3">
+                <p className="text-xs font-bold text-gray-500 mb-2">{t('create.tags_quick')}：</p>
+                <div className="flex flex-wrap gap-2">
+                  {[
+                    t('create.tag_original'),
+                    t('create.tag_tutorial'),
+                    t('create.tag_share'),
+                    t('create.tag_useful'),
+                    t('create.tag_fun'),
+                  ].map((quickTag) => (
+                    <button
+                      key={quickTag}
+                      type="button"
+                      onClick={() => {
+                        if (!tags.includes(quickTag)) {
+                          setTags([...tags, quickTag]);
+                        }
+                      }}
+                      disabled={tags.includes(quickTag)}
+                      className={`
+                        px-3 py-1.5 border-2 border-black rounded-lg font-bold text-xs
+                        transition-all hover:scale-105 active:scale-95
+                        ${
+                          tags.includes(quickTag)
+                            ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                            : 'bg-white hover:bg-toon-blue hover:shadow-toon'
+                        }
+                      `}
+                    >
+                      + {quickTag}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            </div>
+
+            {/* Content Editor */}
             <div>
               <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3 mb-3">
                 <label className="flex items-center gap-2 font-black text-lg md:text-xl text-gray-900">
@@ -231,7 +377,7 @@ export const CreatePost: React.FC = () => {
                 </ToonButton>
               </div>
 
-              {/* Editor Tabs - 优化标签设计 */}
+              {/* Editor Tabs */}
               <div className="flex gap-2 mb-0">
                 <button
                   type="button"
@@ -263,14 +409,14 @@ export const CreatePost: React.FC = () => {
                 </button>
               </div>
 
-              {/* Editor Container - 优化容器 */}
+              {/* Editor Container */}
               <div
                 className={`
                   w-full border-4 border-black rounded-2xl rounded-tl-none p-4 md:p-6 min-h-[300px] md:min-h-[400px]
                   bg-white focus-within:shadow-toon-lg transition-all relative overflow-hidden
                 `}
               >
-                {/* Generating Overlay - 优化加载状态 */}
+                {/* Generating Overlay */}
                 {isGenerating && (
                   <div className="absolute inset-0 z-20 bg-white/80 backdrop-blur-sm flex items-center justify-center rounded-2xl">
                     <div className="flex flex-col items-center p-8 bg-white border-4 border-black rounded-2xl shadow-toon-lg animate-in zoom-in duration-300">
@@ -316,7 +462,7 @@ export const CreatePost: React.FC = () => {
               </div>
             </div>
 
-            {/* Excerpt - 优化样式 */}
+            {/* Excerpt */}
             <div>
               <label className="flex items-center gap-2 font-black text-lg md:text-xl mb-3 text-gray-900">
                 <div className="w-1 h-6 bg-toon-yellow rounded-full"></div>
@@ -332,7 +478,7 @@ export const CreatePost: React.FC = () => {
               />
             </div>
 
-            {/* Submit Button - 优化按钮 */}
+            {/* Submit Button */}
             <ToonButton
               type="submit"
               className="w-full py-4 md:py-5 text-lg md:text-xl shadow-toon-lg hover:shadow-toon-xl active:shadow-toon transition-all"
@@ -343,7 +489,7 @@ export const CreatePost: React.FC = () => {
         </ToonCard>
       </div>
 
-      {/* Overwrite Modal - 保持原样 */}
+      {/* Overwrite Modal */}
       <ToonModal
         isOpen={isOverwriteModalOpen}
         onClose={() => setIsOverwriteModalOpen(false)}
