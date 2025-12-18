@@ -1,4 +1,4 @@
-import { AlertCircle, KeyRound, Loader2, Lock, User, X } from 'lucide-react';
+import { AlertCircle, KeyRound, Lock, User, X } from 'lucide-react';
 import React, { useState } from 'react';
 
 import { useLanguage } from '@/context/LanguageContext';
@@ -168,7 +168,6 @@ export const LoginModal: React.FC<LoginModalProps> = ({ isOpen, onClose, onLogin
             >
               {isLoading ? (
                 <>
-                  <Loader2 className="animate-spin mr-2" size={24} />
                   <span>{t('login.unlocking')}</span>
                 </>
               ) : (
