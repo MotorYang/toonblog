@@ -248,7 +248,7 @@ export const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) =>
         </div>
       </main>
 
-      <footer className="mt-6 md:mt-8 p-3 md:p-6 text-center relative z-10 text-gray-900 mb-20 sm:mb-4">
+      <footer className="mt-6 md:mt-8 p-3 md:p-6 text-center relative text-gray-900 mb-20 sm:mb-4">
         <div className="inline-block bg-white border-2 md:border-4 border-black rounded-full px-4 md:px-6 py-2 text-sm md:text-base font-bold shadow-toon">
           © {new Date().getFullYear()} ToonBlog • Built with MotorYang
         </div>

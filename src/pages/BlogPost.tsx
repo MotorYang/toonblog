@@ -1,29 +1,51 @@
-import { ArrowLeft, Calendar, Eye, Sparkles, Tag, Trash2, User } from 'lucide-react';
-import React, { useEffect, useRef, useState } from 'react';
+import { ArrowLeft, Calendar, Clock, Eye, Sparkles, Tag, Trash2, User } from 'lucide-react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
+import type { Components } from 'react-markdown';
 import ReactMarkdown from 'react-markdown';
 import { useNavigate, useParams } from 'react-router-dom';
 
 import { AiApi } from '@/api/ai';
+import { CodeBlock } from '@/components/CodeBlock';
+import { ImageLightbox } from '@/components/Imagelightbox';
+import { PostNavigation } from '@/components/Postnavigation';
+import { ShareButton } from '@/components/Sharebutton';
+import { TableOfContents } from '@/components/Tableofcontents';
 import { ToonButton } from '@/components/ToonButton';
 import { ToonCard } from '@/components/ToonCard';
 import { ToonModal } from '@/components/ToonModal';
 import { useBlogStore } from '@/context/BlogContext';
 import { useLanguage } from '@/context/LanguageContext';
+import { useReadPosts } from '@/hooks/UseReadPosts';
 import { userAuthStore } from '@/stores/userAuthStore.ts';
 import { SummaryResponse } from '@/types/ai.ts';
+import { calculateReadingTime, formatReadingTime, getAdjacentPosts } from '@/utils/Postutils';
 
 export const BlogPost: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const { getPost, deletePost, incrementViews } = useBlogStore();
+  const { getPost, deletePost, incrementViews, posts } = useBlogStore();
   const { isAdmin } = userAuthStore();
   const { t, language } = useLanguage();
+  const { markAsRead } = useReadPosts();
 
   const post = getPost(id || '');
 
   const [summary, setSummary] = useState<string | null>(null);
   const [loadingSummary, setLoadingSummary] = useState(false);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+  const [readingProgress, setReadingProgress] = useState(0);
+
+  // 计算阅读时间
+  const readingTime = useMemo(() => {
+    if (!post) return 0;
+    return calculateReadingTime(post.content);
+  }, [post]);
+
+  // 获取上下篇
+  const { previous, next } = useMemo(() => {
+    if (!post) return { previous: null, next: null };
+    return getAdjacentPosts(post, posts);
+  }, [post, posts]);
 
   // Use a ref to ensure we only increment view once per mount
   const hasViewed = useRef(false);
@@ -31,9 +53,37 @@ export const BlogPost: React.FC = () => {
   useEffect(() => {
     if (post && !hasViewed.current) {
       incrementViews(post.id);
+      markAsRead(post.id); // 标记为已读
       hasViewed.current = true;
     }
-  }, [post, incrementViews]);
+  }, [post, incrementViews, markAsRead]);
+
+  // 键盘快捷键 - ESC 返回
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        navigate('/');
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [navigate]);
+
+  // 阅读进度追踪
+  useEffect(() => {
+    const handleScroll = () => {
+      const windowHeight = window.innerHeight;
+      const documentHeight = document.documentElement.scrollHeight;
+      const scrollTop = window.scrollY;
+      const trackLength = documentHeight - windowHeight;
+      const progress = Math.min((scrollTop / trackLength) * 100, 100);
+      setReadingProgress(progress);
+    };
+
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
 
   if (!post) {
     return (
@@ -74,8 +124,39 @@ export const BlogPost: React.FC = () => {
     }
   };
 
+  // ReactMarkdown 组件类型定义
+  const markdownComponents: Partial<Components> = {
+    // 代码块
+    code: (props) => {
+      // eslint-disable-next-line react/prop-types
+      const { className, children } = props;
+      // 检查是否为内联代码（没有语言类名通常是内联代码）
+      const match = /language-(\w+)/.exec(className || '');
+      const codeString = String(children).replace(/\n$/, '');
+      const isInline = !match;
+
+      return isInline ? (
+        <CodeBlock inline={true}>{codeString}</CodeBlock>
+      ) : (
+        <CodeBlock language={match[1]} inline={false}>
+          {codeString}
+        </CodeBlock>
+      );
+    },
+    // 图片灯箱
+    img: ({ src, alt }) => <ImageLightbox src={src || ''} alt={alt || ''} className="my-4" />,
+  };
+
   return (
     <div className="max-w-4xl mx-auto space-y-4 md:space-y-5 pb-8">
+      {/* 阅读进度条 */}
+      <div className="fixed top-0 left-0 right-0 z-50 h-1 bg-gray-200">
+        <div
+          className="h-full bg-gradient-to-r from-toon-blue via-toon-purple to-toon-yellow transition-all duration-150"
+          style={{ width: `${readingProgress}%` }}
+        />
+      </div>
+
       {/* Back Button - 紧凑返回按钮 */}
       <div className="animate-in fade-in slide-in-from-left-4 duration-500">
         <ToonButton
@@ -111,24 +192,49 @@ export const BlogPost: React.FC = () => {
             {post.title}
           </h1>
 
+          {/* 分享和操作按钮栏 */}
+          <div
+            className="flex flex-wrap items-center justify-between gap-3 mb-4 pb-4 border-b-2 border-dashed border-gray-200 animate-in fade-in slide-in-from-left-4 duration-500"
+            style={{ animationDelay: '250ms' }}
+          >
+            {/* 左侧：返回提示 */}
+            <div className="flex items-center gap-2 text-xs font-bold text-gray-500">
+              <ArrowLeft size={14} />
+              <span>按 ESC 返回列表</span>
+            </div>
+
+            {/* 右侧：分享按钮 */}
+            <ShareButton
+              url={`/post/${post.id}`}
+              title={post.title}
+              description={post.excerpt}
+              className="shadow-toon hover:shadow-toon-lg"
+            />
+          </div>
+
           {/* Meta Info - 紧凑元信息 */}
           <div
             className="flex flex-wrap gap-2 mb-4 animate-in fade-in slide-in-from-left-4 duration-500"
             style={{ animationDelay: '300ms' }}
           >
-            <span className="flex items-center gap-1.5 bg-gradient-to-r from-toon-yellow to-yellow-300 px-3 py-1.5 border-2 border-black rounded-lg font-black text-xs md:text-sm shadow-toon-sm hover:shadow-toon transition-shadow">
+            <span className="flex items-center gap-1.5 bg-gradient-to-r from-toon-yellow to-yellow-300 px-3 py-1.5 border-2 border-black rounded-lg font-black text-xs md:text-sm shadow-toon-sm hover:shadow-toon transition-all hover:scale-105">
               <div className="bg-white border-2 border-black rounded-full p-0.5">
                 <User size={14} />
               </div>
               {post.author}
             </span>
-            <span className="flex items-center gap-1.5 bg-gradient-to-r from-toon-blue to-cyan-300 px-3 py-1.5 border-2 border-black rounded-lg font-black text-xs md:text-sm shadow-toon-sm hover:shadow-toon transition-shadow text-white">
+            <span className="flex items-center gap-1.5 bg-gradient-to-r from-toon-blue to-cyan-300 px-3 py-1.5 border-2 border-black rounded-lg font-black text-xs md:text-sm shadow-toon-sm hover:shadow-toon transition-all hover:scale-105 text-white">
               <Calendar size={14} />
               {post.date}
             </span>
-            <span className="flex items-center gap-1.5 bg-gradient-to-r from-white to-gray-100 px-3 py-1.5 border-2 border-black rounded-lg font-black text-xs md:text-sm shadow-toon-sm hover:shadow-toon transition-shadow">
+            <span className="flex items-center gap-1.5 bg-gradient-to-r from-white to-gray-100 px-3 py-1.5 border-2 border-black rounded-lg font-black text-xs md:text-sm shadow-toon-sm hover:shadow-toon transition-all hover:scale-105">
               <Eye size={14} className="text-toon-purple" />
-              {post.views?.toLocaleString()}
+              <span className="text-toon-purple">{post.views?.toLocaleString()}</span>
+              <span className="text-gray-600">次浏览</span>
+            </span>
+            <span className="flex items-center gap-1.5 bg-gradient-to-r from-toon-purple to-purple-400 px-3 py-1.5 border-2 border-black rounded-lg font-black text-xs md:text-sm shadow-toon-sm hover:shadow-toon transition-all hover:scale-105 text-white">
+              <Clock size={14} />
+              {formatReadingTime(readingTime)}
             </span>
           </div>
 
@@ -209,10 +315,16 @@ export const BlogPost: React.FC = () => {
             className="animate-in fade-in slide-in-from-bottom-4 duration-500"
             style={{ animationDelay: '600ms' }}
           >
-            <div className="prose prose-sm md:prose-base prose-headings:font-black prose-headings:text-gray-900 prose-headings:mb-3 prose-p:font-medium prose-p:text-gray-800 prose-p:leading-relaxed prose-a:text-toon-blue prose-a:font-bold prose-a:no-underline hover:prose-a:underline prose-a:decoration-2 prose-blockquote:border-l-4 prose-blockquote:border-toon-purple prose-blockquote:bg-gradient-to-r prose-blockquote:from-purple-50 prose-blockquote:to-transparent prose-blockquote:p-3 prose-blockquote:not-italic prose-blockquote:rounded-r-lg prose-blockquote:font-bold prose-img:border-3 prose-img:border-black prose-img:rounded-xl prose-img:shadow-toon prose-strong:text-gray-900 prose-strong:font-black prose-ul:font-medium prose-ol:font-medium prose-li:text-gray-800 max-w-none font-sans overflow-x-hidden">
-              <ReactMarkdown>{post.content}</ReactMarkdown>
-            </div>
+            <article className="prose prose-sm md:prose-base prose-headings:font-black prose-headings:text-gray-900 prose-headings:mb-3 prose-headings:scroll-mt-24 prose-p:font-medium prose-p:text-gray-800 prose-p:leading-relaxed prose-a:text-toon-blue prose-a:font-bold prose-a:no-underline hover:prose-a:underline prose-a:decoration-2 prose-blockquote:border-l-4 prose-blockquote:border-toon-purple prose-blockquote:bg-gradient-to-r prose-blockquote:from-purple-50 prose-blockquote:to-transparent prose-blockquote:p-3 prose-blockquote:not-italic prose-blockquote:rounded-r-lg prose-blockquote:font-bold prose-img:border-3 prose-img:border-black prose-img:rounded-xl prose-img:shadow-toon prose-strong:text-gray-900 prose-strong:font-black prose-ul:font-medium prose-ol:font-medium prose-li:text-gray-800 max-w-none font-sans overflow-x-hidden">
+              <ReactMarkdown components={markdownComponents}>{post.content}</ReactMarkdown>
+            </article>
           </div>
+
+          {/* 目录导航 */}
+          <TableOfContents content={post.content} />
+
+          {/* 上下篇导航 */}
+          <PostNavigation previous={previous} next={next} />
 
           {/* Admin Actions - 紧凑管理操作 */}
           {isAdmin && (
