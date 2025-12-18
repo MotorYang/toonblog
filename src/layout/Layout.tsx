@@ -50,10 +50,10 @@ export const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) =>
 
   return (
     <div className="min-h-screen flex flex-col font-sans transition-colors duration-300">
-      <header className="sticky top-0 z-40 p-2 md:p-4">
-        <div className="max-w-4xl mx-auto bg-white border-2 md:border-4 border-black rounded-2xl shadow-toon transition-all duration-300">
+      <header className="sticky top-0 z-40 px-2 py-2 md:px-4 md:py-3">
+        <div className="max-w-6xl mx-auto bg-white border-2 md:border-4 border-black rounded-2xl shadow-toon transition-all duration-300">
           {/* Desktop Header */}
-          <div className="hidden md:flex px-6 py-4 items-center">
+          <div className="hidden md:flex px-4 py-3 items-center">
             {/* Logo - 靠左 */}
             <Link to="/" className="flex items-center gap-2 group">
               <div className="bg-toon-purple p-2 border-2 border-black rounded-lg group-hover:rotate-12 transition-transform">
@@ -242,13 +242,13 @@ export const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) =>
         </div>
       </header>
 
-      <main className="flex-1 max-w-4xl w-full mx-auto p-2 md:p-4 relative z-10 text-gray-900">
+      <main className="flex-1 max-w-6xl w-full mx-auto px-2 py-2 md:px-4 md:py-3 relative z-10 text-gray-900">
         <div key={location.pathname} className="animate-pop-in h-full">
           {children}
         </div>
       </main>
 
-      <footer className="mt-8 md:mt-12 p-4 md:p-8 text-center relative z-10 text-gray-900 mb-20 sm:mb-4">
+      <footer className="mt-6 md:mt-8 p-3 md:p-6 text-center relative z-10 text-gray-900 mb-20 sm:mb-4">
         <div className="inline-block bg-white border-2 md:border-4 border-black rounded-full px-4 md:px-6 py-2 text-sm md:text-base font-bold shadow-toon">
           © {new Date().getFullYear()} ToonBlog • Built with MotorYang
         </div>

@@ -56,10 +56,10 @@ export const CreatePost: React.FC = () => {
   if (!isAdmin) {
     return (
       <div className="flex flex-col items-center justify-center min-h-[50vh] text-center animate-in fade-in scale-in duration-500">
-        <div className="bg-toon-red/20 p-8 border-4 border-black rounded-2xl shadow-toon-lg">
-          <Lock size={64} className="text-toon-red mb-4 mx-auto animate-pulse" />
-          <h2 className="text-3xl font-black mb-2 text-gray-900">访问受限！</h2>
-          <p className="font-bold text-gray-600">仅管理员可创建文章</p>
+        <div className="bg-toon-red/20 p-6 md:p-8 border-3 border-black rounded-2xl shadow-toon-lg">
+          <Lock size={48} className="text-toon-red mb-3 mx-auto animate-pulse" />
+          <h2 className="text-2xl md:text-3xl font-black mb-2 text-gray-900">访问受限！</h2>
+          <p className="font-bold text-gray-600 text-sm">仅管理员可创建文章</p>
         </div>
       </div>
     );
@@ -165,11 +165,11 @@ export const CreatePost: React.FC = () => {
   ];
 
   return (
-    <div className="max-w-3xl mx-auto pb-12">
-      {/* Header */}
-      <div className="mb-6 md:mb-8 text-center animate-in fade-in slide-in-from-top-4 duration-500">
-        <h1 className="text-3xl md:text-5xl font-black mb-2 text-gray-900">{t('create.title')}</h1>
-        <p className="text-sm md:text-base font-bold text-gray-600">{t('create.subtitle')}</p>
+    <div className="max-w-3xl mx-auto pb-8">
+      {/* Header - 紧凑标题 */}
+      <div className="mb-4 md:mb-5 text-center animate-in fade-in slide-in-from-top-4 duration-500">
+        <h1 className="text-2xl md:text-4xl font-black mb-1 text-gray-900">{t('create.title')}</h1>
+        <p className="text-xs md:text-sm font-bold text-gray-600">{t('create.subtitle')}</p>
       </div>
 
       <div
@@ -177,24 +177,24 @@ export const CreatePost: React.FC = () => {
         style={{ animationDelay: '100ms' }}
       >
         <ToonCard color="white" className="shadow-toon-lg">
-          <form onSubmit={handleSubmit} className="space-y-6">
-            {/* Image Upload */}
-            <div className="space-y-3">
-              <label className="flex items-center gap-2 font-black text-lg md:text-xl text-gray-900">
-                <div className="w-1 h-6 bg-toon-purple rounded-full"></div>
+          <form onSubmit={handleSubmit} className="space-y-4">
+            {/* Image Upload - 紧凑图片上传 */}
+            <div className="space-y-2">
+              <label className="flex items-center gap-2 font-black text-base md:text-lg text-gray-900">
+                <div className="w-1 h-5 bg-toon-purple rounded-full"></div>
                 {t('create.cover_image')}
               </label>
 
               {!coverImage ? (
                 <div
                   onClick={() => fileInputRef.current?.click()}
-                  className="border-4 border-dashed border-black rounded-2xl p-8 md:p-12 flex flex-col items-center justify-center cursor-pointer bg-gradient-to-br from-gray-50 to-white hover:from-toon-yellow/10 hover:to-toon-yellow/5 transition-all group"
+                  className="border-3 border-dashed border-black rounded-xl p-6 md:p-8 flex flex-col items-center justify-center cursor-pointer bg-gradient-to-br from-gray-50 to-white hover:from-toon-yellow/10 hover:to-toon-yellow/5 transition-all group"
                 >
-                  <div className="bg-gradient-to-br from-toon-yellow to-yellow-300 p-4 border-3 border-black rounded-2xl mb-4 shadow-toon group-hover:shadow-toon-lg group-hover:scale-110 transition-all">
-                    <Upload size={32} className="text-gray-900" />
+                  <div className="bg-gradient-to-br from-toon-yellow to-yellow-300 p-3 border-2 border-black rounded-xl mb-3 shadow-toon group-hover:shadow-toon-lg group-hover:scale-110 transition-all">
+                    <Upload size={24} className="text-gray-900" />
                   </div>
-                  <p className="font-black text-lg md:text-xl mb-1">{t('create.upload')}</p>
-                  <p className="text-sm font-bold text-gray-500">{t('create.upload_sub')}</p>
+                  <p className="font-black text-base md:text-lg mb-1">{t('create.upload')}</p>
+                  <p className="text-xs font-bold text-gray-500">{t('create.upload_sub')}</p>
                   <input
                     type="file"
                     ref={fileInputRef}
@@ -204,56 +204,55 @@ export const CreatePost: React.FC = () => {
                   />
                 </div>
               ) : (
-                <div className="relative border-4 border-black rounded-2xl overflow-hidden group shadow-toon hover:shadow-toon-lg transition-shadow">
+                <div className="relative border-3 border-black rounded-xl overflow-hidden group shadow-toon hover:shadow-toon-lg transition-shadow">
                   <img
                     src={coverImage}
                     alt="Preview"
-                    className="w-full h-56 md:h-64 object-cover"
+                    className="w-full h-48 md:h-56 object-cover"
                   />
                   <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/0 to-black/0 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
                     <button
                       type="button"
                       onClick={removeImage}
-                      className="bg-toon-red text-white px-4 py-3 border-3 border-black rounded-xl shadow-toon-lg hover:shadow-toon hover:scale-105 active:scale-95 transition-all font-black flex items-center gap-2"
+                      className="bg-toon-red text-white px-3 py-2 border-2 border-black rounded-lg shadow-toon-lg hover:shadow-toon hover:scale-105 active:scale-95 transition-all font-black flex items-center gap-2 text-sm"
                     >
-                      <X size={20} /> {t('create.remove')}
+                      <X size={18} /> {t('create.remove')}
                     </button>
                   </div>
                 </div>
               )}
             </div>
 
-            {/* Title Input */}
+            {/* Title Input - 紧凑标题输入 */}
             <div>
-              <label className="flex items-center gap-2 font-black text-lg md:text-xl mb-3 text-gray-900">
-                <div className="w-1 h-6 bg-toon-blue rounded-full"></div>
+              <label className="flex items-center gap-2 font-black text-base md:text-lg mb-2 text-gray-900">
+                <div className="w-1 h-5 bg-toon-blue rounded-full"></div>
                 {t('create.post_title')}
               </label>
               <input
                 type="text"
                 value={title}
                 onChange={(e) => setTitle(e.target.value)}
-                className="w-full border-4 border-black rounded-xl p-3 md:p-4 text-base md:text-lg font-bold focus:outline-none focus:border-toon-blue focus:shadow-toon-lg transition-all bg-white"
+                className="w-full border-3 border-black rounded-lg p-2.5 md:p-3 text-sm md:text-base font-bold focus:outline-none focus:border-toon-blue focus:shadow-toon-lg transition-all bg-white"
                 placeholder="如：如何教我的猫写代码..."
               />
             </div>
 
-            {/* Category - Pills Only */}
+            {/* Category - 紧凑分类 */}
             <div>
-              <label className="flex items-center gap-2 font-black text-lg md:text-xl mb-3 text-gray-900">
-                <div className="w-1 h-6 bg-toon-red rounded-full"></div>
+              <label className="flex items-center gap-2 font-black text-base md:text-lg mb-2 text-gray-900">
+                <div className="w-1 h-5 bg-toon-red rounded-full"></div>
                 {t('create.category')}
               </label>
 
-              {/* Category Pills */}
-              <div className="flex flex-wrap gap-2 md:gap-3">
+              <div className="flex flex-wrap gap-2">
                 {categories.map((cat) => (
                   <button
                     key={cat.value}
                     type="button"
                     onClick={() => setCategory(cat.value)}
                     className={`
-                      px-5 md:px-6 py-3 md:py-3.5 border-4 border-black rounded-full font-black text-sm md:text-base
+                      px-4 md:px-5 py-2 md:py-2.5 border-3 border-black rounded-full font-black text-xs md:text-sm
                       transition-all hover:scale-105 active:scale-95
                       ${
                         category === cat.value
@@ -262,60 +261,60 @@ export const CreatePost: React.FC = () => {
                       }
                     `}
                   >
-                    <span className="mr-1.5 text-lg">{cat.emoji}</span>
+                    <span className="mr-1 text-base">{cat.emoji}</span>
                     {t(`category.${cat.value}`)}
                   </button>
                 ))}
               </div>
             </div>
 
-            {/* Tags Input - New Feature */}
+            {/* Tags Input - 紧凑标签 */}
             <div>
-              <label className="flex items-center gap-2 font-black text-lg md:text-xl mb-3 text-gray-900">
-                <div className="w-1 h-6 bg-toon-yellow rounded-full"></div>
-                <Tag size={20} /> {t('create.tags')}
+              <label className="flex items-center gap-2 font-black text-base md:text-lg mb-2 text-gray-900">
+                <div className="w-1 h-5 bg-toon-yellow rounded-full"></div>
+                <Tag size={18} /> {t('create.tags')}
               </label>
 
               {/* Tag Input */}
-              <div className="flex gap-2 mb-3">
+              <div className="flex gap-2 mb-2">
                 <input
                   type="text"
                   value={tagInput}
                   onChange={(e) => setTagInput(e.target.value)}
                   onKeyDown={handleTagInputKeyDown}
-                  className="flex-1 border-4 border-black rounded-xl p-3 font-bold focus:outline-none focus:border-toon-yellow focus:shadow-toon-lg transition-all bg-white"
+                  className="flex-1 border-3 border-black rounded-lg p-2.5 font-bold text-sm focus:outline-none focus:border-toon-yellow focus:shadow-toon-lg transition-all bg-white"
                   placeholder={t('create.tags_placeholder')}
                 />
                 <button
                   type="button"
                   onClick={addTag}
-                  className="bg-toon-yellow border-4 border-black rounded-xl px-4 py-3 font-black hover:bg-yellow-300 hover:shadow-toon-lg active:scale-95 transition-all flex items-center gap-2"
+                  className="bg-toon-yellow border-3 border-black rounded-lg px-3 py-2.5 font-black hover:bg-yellow-300 hover:shadow-toon-lg active:scale-95 transition-all flex items-center gap-1.5 text-sm"
                 >
-                  <Plus size={20} /> {t('create.tags_add')}
+                  <Plus size={18} /> {t('create.tags_add')}
                 </button>
               </div>
 
               {/* Tags Display */}
-              <div className="flex flex-wrap gap-2 min-h-[3rem] p-4 border-4 border-dashed border-gray-300 rounded-xl bg-gray-50">
+              <div className="flex flex-wrap gap-1.5 min-h-[2.5rem] p-3 border-3 border-dashed border-gray-300 rounded-lg bg-gray-50">
                 {tags.length === 0 ? (
-                  <div className="w-full text-center text-gray-400 font-bold italic py-2">
+                  <div className="w-full text-center text-gray-400 font-bold italic py-1 text-xs">
                     {t('create.tags_empty')}
                   </div>
                 ) : (
                   tags.map((tag, index) => (
                     <div
                       key={index}
-                      className="group relative bg-gradient-to-r from-toon-yellow to-yellow-300 border-3 border-black rounded-full px-4 py-2 font-black text-sm shadow-toon hover:shadow-toon-lg transition-all flex items-center gap-2 animate-in zoom-in duration-200"
+                      className="group relative bg-gradient-to-r from-toon-yellow to-yellow-300 border-2 border-black rounded-full px-3 py-1 font-black text-xs shadow-toon hover:shadow-toon-lg transition-all flex items-center gap-1.5 animate-in zoom-in duration-200"
                       style={{ animationDelay: `${index * 50}ms` }}
                     >
-                      <Tag size={14} />
+                      <Tag size={12} />
                       {tag}
                       <button
                         type="button"
                         onClick={() => removeTag(tag)}
-                        className="ml-1 hover:bg-toon-red hover:text-white rounded-full p-1 transition-all"
+                        className="ml-0.5 hover:bg-toon-red hover:text-white rounded-full p-0.5 transition-all"
                       >
-                        <X size={14} />
+                        <X size={12} />
                       </button>
                     </div>
                   ))
@@ -323,9 +322,9 @@ export const CreatePost: React.FC = () => {
               </div>
 
               {/* Quick Tags */}
-              <div className="mt-3">
-                <p className="text-xs font-bold text-gray-500 mb-2">{t('create.tags_quick')}：</p>
-                <div className="flex flex-wrap gap-2">
+              <div className="mt-2">
+                <p className="text-xs font-bold text-gray-500 mb-1.5">{t('create.tags_quick')}：</p>
+                <div className="flex flex-wrap gap-1.5">
                   {[
                     t('create.tag_original'),
                     t('create.tag_tutorial'),
@@ -343,7 +342,7 @@ export const CreatePost: React.FC = () => {
                       }}
                       disabled={tags.includes(quickTag)}
                       className={`
-                        px-3 py-1.5 border-2 border-black rounded-lg font-bold text-xs
+                        px-2.5 py-1 border-2 border-black rounded-md font-bold text-xs
                         transition-all hover:scale-105 active:scale-95
                         ${
                           tags.includes(quickTag)
@@ -359,11 +358,11 @@ export const CreatePost: React.FC = () => {
               </div>
             </div>
 
-            {/* Content Editor */}
+            {/* Content Editor - 紧凑编辑器 */}
             <div>
-              <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3 mb-3">
-                <label className="flex items-center gap-2 font-black text-lg md:text-xl text-gray-900">
-                  <div className="w-1 h-6 bg-toon-purple rounded-full"></div>
+              <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2 mb-2">
+                <label className="flex items-center gap-2 font-black text-base md:text-lg text-gray-900">
+                  <div className="w-1 h-5 bg-toon-purple rounded-full"></div>
                   {t('create.content')}
                 </label>
                 <ToonButton
@@ -371,9 +370,9 @@ export const CreatePost: React.FC = () => {
                   variant="secondary"
                   onClick={startAIWrite}
                   isLoading={isGenerating}
-                  className="text-sm py-2 px-4 shadow-toon hover:shadow-toon-lg"
+                  className="text-xs py-1.5 px-3 shadow-toon hover:shadow-toon-lg"
                 >
-                  <Wand2 size={16} className="mr-2" /> {t('create.magic_write')}
+                  <Wand2 size={14} className="mr-1.5" /> {t('create.magic_write')}
                 </ToonButton>
               </div>
 
@@ -383,51 +382,51 @@ export const CreatePost: React.FC = () => {
                   type="button"
                   onClick={() => setActiveTab('write')}
                   className={`
-                    flex items-center gap-2 px-4 md:px-6 py-2.5 md:py-3 font-black border-4 border-black rounded-t-2xl transition-all text-sm md:text-base
+                    flex items-center gap-1.5 px-3 md:px-4 py-2 font-black border-3 border-black rounded-t-xl transition-all text-xs md:text-sm
                     ${
                       activeTab === 'write'
-                        ? 'bg-toon-yellow text-gray-900 -mb-[4px] z-10 shadow-toon'
+                        ? 'bg-toon-yellow text-gray-900 -mb-[3px] z-10 shadow-toon'
                         : 'bg-gray-100 hover:bg-gray-200 mt-1 border-b-0'
                     }
                   `}
                 >
-                  <Edit3 size={18} /> {t('create.write')}
+                  <Edit3 size={16} /> {t('create.write')}
                 </button>
                 <button
                   type="button"
                   onClick={() => setActiveTab('preview')}
                   className={`
-                    flex items-center gap-2 px-4 md:px-6 py-2.5 md:py-3 font-black border-4 border-black rounded-t-2xl transition-all text-sm md:text-base
+                    flex items-center gap-1.5 px-3 md:px-4 py-2 font-black border-3 border-black rounded-t-xl transition-all text-xs md:text-sm
                     ${
                       activeTab === 'preview'
-                        ? 'bg-toon-blue text-gray-900 -mb-[4px] z-10 shadow-toon'
+                        ? 'bg-toon-blue text-gray-900 -mb-[3px] z-10 shadow-toon'
                         : 'bg-gray-100 hover:bg-gray-200 mt-1 border-b-0'
                     }
                   `}
                 >
-                  <Eye size={18} /> {t('create.preview')}
+                  <Eye size={16} /> {t('create.preview')}
                 </button>
               </div>
 
               {/* Editor Container */}
               <div
                 className={`
-                  w-full border-4 border-black rounded-2xl rounded-tl-none p-4 md:p-6 min-h-[300px] md:min-h-[400px]
+                  w-full border-3 border-black rounded-xl rounded-tl-none p-3 md:p-4 min-h-[250px] md:min-h-[350px]
                   bg-white focus-within:shadow-toon-lg transition-all relative overflow-hidden
                 `}
               >
                 {/* Generating Overlay */}
                 {isGenerating && (
-                  <div className="absolute inset-0 z-20 bg-white/80 backdrop-blur-sm flex items-center justify-center rounded-2xl">
-                    <div className="flex flex-col items-center p-8 bg-white border-4 border-black rounded-2xl shadow-toon-lg animate-in zoom-in duration-300">
+                  <div className="absolute inset-0 z-20 bg-white/80 backdrop-blur-sm flex items-center justify-center rounded-xl">
+                    <div className="flex flex-col items-center p-6 bg-white border-3 border-black rounded-xl shadow-toon-lg animate-in zoom-in duration-300">
                       <div className="relative">
-                        <Loader2 className="w-16 h-16 animate-spin text-toon-purple" />
-                        <Sparkles className="w-6 h-6 text-toon-yellow absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 animate-pulse" />
+                        <Loader2 className="w-12 h-12 animate-spin text-toon-purple" />
+                        <Sparkles className="w-5 h-5 text-toon-yellow absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 animate-pulse" />
                       </div>
-                      <span className="font-black text-xl mt-4 animate-pulse text-gray-900">
+                      <span className="font-black text-lg mt-3 animate-pulse text-gray-900">
                         {t('create.generating')}
                       </span>
-                      <span className="text-sm font-bold text-gray-600 mt-2">AI 正在创作中...</span>
+                      <span className="text-xs font-bold text-gray-600 mt-1">AI 正在创作中...</span>
                     </div>
                   </div>
                 )}
@@ -436,8 +435,8 @@ export const CreatePost: React.FC = () => {
                   <textarea
                     value={content}
                     onChange={(e) => setContent(e.target.value)}
-                    rows={14}
-                    className="w-full h-full font-mono text-sm md:text-base focus:outline-none resize-none bg-transparent text-gray-900 leading-relaxed"
+                    rows={12}
+                    className="w-full h-full font-mono text-xs md:text-sm focus:outline-none resize-none bg-transparent text-gray-900 leading-relaxed"
                     placeholder="使用 Markdown 编写精彩内容...
 
 # 标题
@@ -448,13 +447,13 @@ export const CreatePost: React.FC = () => {
                     disabled={isGenerating}
                   />
                 ) : (
-                  <div className="prose prose-sm md:prose-lg prose-headings:font-black prose-p:font-medium prose-a:text-toon-blue prose-a:font-bold prose-strong:text-gray-900 prose-img:border-4 prose-img:border-black prose-img:rounded-xl prose-ul:font-medium max-w-none font-sans overflow-y-auto max-h-[400px] md:max-h-[500px]">
+                  <div className="prose prose-sm md:prose-base prose-headings:font-black prose-p:font-medium prose-a:text-toon-blue prose-a:font-bold prose-strong:text-gray-900 prose-img:border-3 prose-img:border-black prose-img:rounded-lg prose-ul:font-medium max-w-none font-sans overflow-y-auto max-h-[300px] md:max-h-[400px]">
                     {content ? (
                       <ReactMarkdown>{content}</ReactMarkdown>
                     ) : (
-                      <div className="flex flex-col items-center justify-center h-64 text-gray-400">
-                        <Eye size={48} className="mb-3 opacity-50" />
-                        <p className="italic font-bold">暂无内容预览...</p>
+                      <div className="flex flex-col items-center justify-center h-48 text-gray-400">
+                        <Eye size={40} className="mb-2 opacity-50" />
+                        <p className="italic font-bold text-sm">暂无内容预览...</p>
                       </div>
                     )}
                   </div>
@@ -462,28 +461,28 @@ export const CreatePost: React.FC = () => {
               </div>
             </div>
 
-            {/* Excerpt */}
+            {/* Excerpt - 紧凑摘要 */}
             <div>
-              <label className="flex items-center gap-2 font-black text-lg md:text-xl mb-3 text-gray-900">
-                <div className="w-1 h-6 bg-toon-yellow rounded-full"></div>
+              <label className="flex items-center gap-2 font-black text-base md:text-lg mb-2 text-gray-900">
+                <div className="w-1 h-5 bg-toon-yellow rounded-full"></div>
                 {t('create.excerpt')}
-                <span className="text-sm font-bold text-gray-500">(可选)</span>
+                <span className="text-xs font-bold text-gray-500">(可选)</span>
               </label>
               <textarea
                 value={excerpt}
                 onChange={(e) => setExcerpt(e.target.value)}
-                rows={3}
-                className="w-full border-4 border-black rounded-xl p-3 md:p-4 font-medium text-sm md:text-base focus:outline-none focus:border-toon-yellow focus:shadow-toon-lg transition-all bg-white text-gray-900"
+                rows={2}
+                className="w-full border-3 border-black rounded-lg p-2.5 md:p-3 font-medium text-xs md:text-sm focus:outline-none focus:border-toon-yellow focus:shadow-toon-lg transition-all bg-white text-gray-900"
                 placeholder="为首页写一段吸引人的摘要..."
               />
             </div>
 
-            {/* Submit Button */}
+            {/* Submit Button - 紧凑提交按钮 */}
             <ToonButton
               type="submit"
-              className="w-full py-4 md:py-5 text-lg md:text-xl shadow-toon-lg hover:shadow-toon-xl active:shadow-toon transition-all"
+              className="w-full py-3 md:py-4 text-base md:text-lg shadow-toon-lg hover:shadow-toon-xl active:shadow-toon transition-all"
             >
-              <Save className="mr-2" size={24} /> {t('create.publish')}
+              <Save className="mr-2" size={20} /> {t('create.publish')}
             </ToonButton>
           </form>
         </ToonCard>
