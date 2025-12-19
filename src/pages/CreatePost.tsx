@@ -15,14 +15,14 @@ import React, { useEffect, useRef, useState } from 'react';
 import ReactMarkdown from 'react-markdown';
 import { useNavigate } from 'react-router-dom';
 
-import { AiApi } from '@/api/ai';
 import { ToonButton } from '@/components/ToonButton';
 import { ToonCard } from '@/components/ToonCard';
 import { ToonModal } from '@/components/ToonModal';
 import { useBlogStore } from '@/context/BlogContext';
 import { useLanguage } from '@/context/LanguageContext';
+import { aiService } from '@/services/ai';
 import { userAuthStore } from '@/stores/userAuthStore.ts';
-import { GenerateContentResponse } from '@/types/ai.ts';
+import { GenerateContentResponse } from '@/types/ai';
 
 import { Article } from '../../types.ts';
 
@@ -117,7 +117,7 @@ export const CreatePost: React.FC = () => {
     setIsGenerating(true);
     setActiveTab('write');
     try {
-      const generatedContent: GenerateContentResponse = await AiApi.generateBlogContent({
+      const generatedContent: GenerateContentResponse = await aiService.generateBlogContent({
         title: title,
         content:
           'Make it funny and cartoonish. Use Markdown formatting like **bold**, ## Headings, and bullet points.',

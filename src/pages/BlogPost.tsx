@@ -4,7 +4,6 @@ import type { Components } from 'react-markdown';
 import ReactMarkdown from 'react-markdown';
 import { useNavigate, useParams } from 'react-router-dom';
 
-import { AiApi } from '@/api/ai';
 import { CodeBlock } from '@/components/CodeBlock';
 import { ImageLightbox } from '@/components/Imagelightbox';
 import { PostNavigation } from '@/components/Postnavigation';
@@ -16,8 +15,9 @@ import { ToonModal } from '@/components/ToonModal';
 import { useBlogStore } from '@/context/BlogContext';
 import { useLanguage } from '@/context/LanguageContext';
 import { useReadPosts } from '@/hooks/UseReadPosts';
-import { userAuthStore } from '@/stores/userAuthStore.ts';
-import { SummaryResponse } from '@/types/ai.ts';
+import { aiService } from '@/services/ai';
+import { userAuthStore } from '@/stores/userAuthStore';
+import { SummaryResponse } from '@/types/ai';
 import { calculateReadingTime, formatReadingTime, getAdjacentPosts } from '@/utils/Postutils';
 
 export const BlogPost: React.FC = () => {
@@ -112,7 +112,7 @@ export const BlogPost: React.FC = () => {
   const handleGenerateSummary = async () => {
     setLoadingSummary(true);
     try {
-      const result: SummaryResponse = await AiApi.generateSummary({
+      const result: SummaryResponse = await aiService.generateSummary({
         content: post.content,
         lang: language,
       });
