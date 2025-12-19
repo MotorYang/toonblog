@@ -1,4 +1,3 @@
-import { Chat, GenerateContentResponse } from '@google/genai';
 import {
   AlertTriangle,
   Maximize2,
@@ -15,9 +14,8 @@ import {
 } from 'lucide-react';
 import React, { useEffect, useRef, useState } from 'react';
 
+import { AiApi } from '@/api/ai';
 import { useLanguage } from '@/context/LanguageContext';
-
-import { healthCheck } from '../services/geminiService.ts';
 
 // Mock Playlist
 const PLAYLIST = [
@@ -38,6 +36,12 @@ const PLAYLIST = [
   },
 ];
 
+// 定义消息类型
+interface ChatMessage {
+  role: 'user' | 'assistant';
+  content: string;
+}
+
 export const GlobalToolbox: React.FC = () => {
   const { t } = useLanguage();
   const [isOpen, setIsOpen] = useState(false);
@@ -50,12 +54,14 @@ export const GlobalToolbox: React.FC = () => {
   const audioRef = useRef<HTMLAudioElement | null>(null);
 
   // Chat State
-  const [messages, setMessages] = useState<{ role: 'user' | 'model'; text: string }[]>([]);
+  const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
-  const chatSessionRef = useRef<Chat | null>(null);
   const chatEndRef = useRef<HTMLDivElement>(null);
-  const [chatError] = useState('');
+  const [chatError, setChatError] = useState('');
+
+  // 聊天会话 ID - 使用 ref 保持会话持久化
+  const sessionIdRef = useRef<string>('');
 
   // 检测是否为移动设备
   const isMobile = () => {
@@ -72,7 +78,7 @@ export const GlobalToolbox: React.FC = () => {
     };
   }, []);
 
-  // 打开时检测是否移动端，自动全屏
+  // 打开时检测是否移动端,自动全屏
   useEffect(() => {
     if (isOpen && isMobile()) {
       setIsFullscreen(true);
@@ -110,9 +116,18 @@ export const GlobalToolbox: React.FC = () => {
     setIsPlaying(true);
   };
 
-  // Init Chat
+  // Init Chat - 检查后端健康状态
   useEffect(() => {
-    healthCheck().then();
+    const checkHealth = async () => {
+      try {
+        await AiApi.healthCheck();
+        setChatError('');
+      } catch (error) {
+        console.error('AI service health check failed:', error);
+        setChatError('AI service is currently unavailable');
+      }
+    };
+    checkHealth();
   }, []);
 
   // Scroll chat
@@ -120,32 +135,52 @@ export const GlobalToolbox: React.FC = () => {
     chatEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages]);
 
+  /**
+   * 处理发送消息 - 使用后端 sessionId 管理对话历史
+   */
   const handleSendMessage = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!input.trim()) return;
 
-    if (!chatSessionRef.current) {
-      setMessages((prev) => [...prev, { role: 'user', text: input }]);
-      setMessages((prev) => [
-        ...prev,
-        { role: 'model', text: "Sorry, I can't think right now (API Key issue)." },
-      ]);
-      setInput('');
-      return;
-    }
+    const userMsg = input.trim();
+    const userMessage: ChatMessage = { role: 'user', content: userMsg };
 
-    const userMsg = input;
-    setMessages((prev) => [...prev, { role: 'user', text: userMsg }]);
+    // 添加用户消息到界面
+    setMessages((prev) => [...prev, userMessage]);
     setInput('');
     setIsLoading(true);
 
     try {
-      const result: GenerateContentResponse = await chatSessionRef.current.sendMessage({
+      // 调用后端 chat API - 后端通过 sessionId 管理历史
+      const response = await AiApi.chat({
         message: userMsg,
+        sessionId: sessionIdRef.current || undefined, // 首次为空,后端会生成
       });
-      setMessages((prev) => [...prev, { role: 'model', text: result.text || "I'm speechless!" }]);
-    } catch {
-      setMessages((prev) => [...prev, { role: 'model', text: t('tool.send_error') }]);
+
+      // 保存后端返回的 sessionId
+      if (response.sessionId) {
+        sessionIdRef.current = response.sessionId;
+      }
+
+      // 添加 AI 回复到界面
+      const assistantMessage: ChatMessage = {
+        role: 'assistant',
+        content: response.reply || "I'm speechless!",
+      };
+      setMessages((prev) => [...prev, assistantMessage]);
+      setChatError('');
+    } catch (error) {
+      console.error('Chat error:', error);
+
+      // 添加错误消息
+      const errorMessage: ChatMessage = {
+        role: 'assistant',
+        content: t('tool.send_error'),
+      };
+      setMessages((prev) => [...prev, errorMessage]);
+
+      // 设置错误状态
+      setChatError('Failed to connect to AI service');
     } finally {
       setIsLoading(false);
     }
@@ -159,6 +194,13 @@ export const GlobalToolbox: React.FC = () => {
   const toggleFullscreen = () => {
     setIsFullscreen(!isFullscreen);
   };
+
+  // 清空聊天 - 重置会话
+  // const handleClearChat = () => {
+  //   setMessages([]);
+  //   sessionIdRef.current = '';
+  //   setChatError('');
+  // };
 
   return (
     <div className="fixed bottom-2 right-2 sm:bottom-4 sm:right-4 z-[100] flex flex-col items-end font-sans">
@@ -227,46 +269,48 @@ export const GlobalToolbox: React.FC = () => {
           {/* Content */}
           <div
             className={`bg-gradient-to-br from-white to-gray-50 relative overflow-hidden ${
-              isFullscreen ? 'h-[calc(100%-60px)] sm:h-[calc(100%-68px)]' : 'h-[380px] sm:h-96'
+              isFullscreen
+                ? 'h-[calc(100vh-60px)] sm:h-[calc(100vh-120px)]'
+                : 'h-[380px] sm:h-[420px]'
             }`}
           >
-            {/* Decorative elements */}
-            <div className="absolute top-0 right-0 w-32 h-32 bg-toon-yellow/10 rounded-full blur-3xl pointer-events-none"></div>
-            <div className="absolute bottom-0 left-0 w-40 h-40 bg-toon-purple/10 rounded-full blur-3xl pointer-events-none"></div>
+            {/* Decorative Elements */}
+            <div className="absolute inset-0 pointer-events-none overflow-hidden opacity-5">
+              <div className="absolute -top-20 -right-20 w-64 h-64 rounded-full bg-toon-yellow blur-3xl" />
+              <div className="absolute -bottom-20 -left-20 w-64 h-64 rounded-full bg-toon-blue blur-3xl" />
+            </div>
 
             {/* MUSIC TAB */}
             {activeTab === 'music' && (
-              <div className="h-full flex flex-col p-4 pb-6 sm:p-6 sm:pb-8 items-center justify-between relative z-10">
+              <div className="flex flex-col items-center justify-center h-full relative z-10 px-4">
                 {/* Vinyl Record Animation */}
-                <div className="relative mt-2 sm:mt-4">
+                <div className="relative mb-4 sm:mb-6">
                   <div
-                    className={`bg-gradient-to-br from-gray-800 to-gray-900 rounded-full border-4 border-black flex items-center justify-center shadow-[8px_8px_0px_0px_rgba(0,0,0,0.3)] relative ${
-                      isPlaying ? 'animate-[spin_3s_linear_infinite]' : ''
-                    } ${isFullscreen ? 'w-48 h-48 sm:w-64 sm:h-64' : 'w-28 h-28 sm:w-36 sm:h-36'}`}
+                    className={`border-8 border-black rounded-full bg-gradient-to-br from-gray-900 to-black shadow-toon-lg relative overflow-hidden ${
+                      isFullscreen ? 'w-40 h-40 sm:w-56 sm:h-56' : 'w-28 h-28 sm:w-36 sm:h-36'
+                    } ${isPlaying ? 'animate-spin-slow' : ''}`}
                   >
-                    {/* Vinyl grooves */}
-                    <div className="absolute inset-0 rounded-full border-2 border-gray-700 m-3"></div>
-                    <div className="absolute inset-0 rounded-full border-2 border-gray-700 m-6"></div>
-                    <div className="absolute inset-0 rounded-full border-2 border-gray-700 m-9"></div>
-
-                    {/* Center label */}
-                    <div
-                      className={`bg-toon-yellow rounded-full border-3 border-black flex items-center justify-center relative z-10 ${
-                        isFullscreen ? 'w-24 h-24 sm:w-32 sm:h-32' : 'w-14 h-14 sm:w-18 sm:h-18'
-                      }`}
-                    >
-                      <Music
-                        size={isFullscreen ? 48 : 24}
-                        className={`text-gray-900 ${isFullscreen ? 'sm:w-16 sm:h-16' : 'sm:w-7 sm:h-7'}`}
+                    <div className="absolute inset-0 flex items-center justify-center">
+                      <div
+                        className={`rounded-full bg-toon-yellow border-2 border-black ${
+                          isFullscreen ? 'w-8 h-8 sm:w-12 sm:h-12' : 'w-6 h-6 sm:w-8 sm:h-8'
+                        }`}
                       />
                     </div>
+                    {Array.from({ length: 8 }).map((_, i) => (
+                      <div
+                        key={i}
+                        className="absolute inset-0 border border-white/10 rounded-full"
+                        style={{ margin: `${(i + 1) * 8}px` }}
+                      />
+                    ))}
                   </div>
 
-                  {/* Floating music notes */}
+                  {/* Music Notes Animation */}
                   {isPlaying && (
                     <>
                       <div
-                        className={`absolute -top-2 -right-2 text-toon-red animate-[bounce_1s_ease-in-out_infinite] ${
+                        className={`absolute top-0 right-0 text-toon-yellow animate-[bounce_1s_ease-in-out_infinite] ${
                           isFullscreen ? 'text-4xl sm:text-5xl' : 'text-2xl'
                         }`}
                       >
@@ -449,7 +493,7 @@ export const GlobalToolbox: React.FC = () => {
                             : 'bg-white text-gray-900 rounded-bl-md'
                         }`}
                       >
-                        {msg.text}
+                        {msg.content}
                       </div>
                     </div>
                   ))}

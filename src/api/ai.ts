@@ -19,5 +19,5 @@ export const AiApi = {
   chat: async (chatRequest: ChatRequest): Promise<ChatResponse> =>
     await http.post(`/cartoon/ai/chat`, chatRequest),
 
-  healthCheck: async (): Promise<HealthCheckResponse> => await http.get(`/cartoon/ai/health-check`),
+  healthCheck: async (): Promise<HealthCheckResponse> => await http.get(`/cartoon/ai/health`),
 };

@@ -24,7 +24,8 @@ export interface ChatRequest {
 }
 
 export interface ChatResponse {
-  message: string;
+  reply: string;
+  sessionId: string;
 }
 
 export interface HealthCheckResponse {
