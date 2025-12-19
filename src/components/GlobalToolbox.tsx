@@ -17,7 +17,7 @@ import React, { useEffect, useRef, useState } from 'react';
 
 import { useLanguage } from '@/context/LanguageContext';
 
-import { getChatSession } from '../services/geminiService.ts';
+import { healthCheck } from '../services/geminiService.ts';
 
 // Mock Playlist
 const PLAYLIST = [
@@ -55,7 +55,7 @@ export const GlobalToolbox: React.FC = () => {
   const [isLoading, setIsLoading] = useState(false);
   const chatSessionRef = useRef<Chat | null>(null);
   const chatEndRef = useRef<HTMLDivElement>(null);
-  const [chatError, setChatError] = useState('');
+  const [chatError] = useState('');
 
   // 检测是否为移动设备
   const isMobile = () => {
@@ -112,12 +112,7 @@ export const GlobalToolbox: React.FC = () => {
 
   // Init Chat
   useEffect(() => {
-    try {
-      chatSessionRef.current = getChatSession();
-    } catch (e) {
-      console.error('Chat init failed', e);
-      setChatError('API Key missing');
-    }
+    healthCheck().then();
   }, []);
 
   // Scroll chat

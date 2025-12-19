@@ -1,5 +1,3 @@
-import { User } from '@/types/auth';
-
 export interface Article {
   id: string;
   title: string;
@@ -22,14 +20,6 @@ export interface BlogContextType {
   incrementViews: (id: string) => Promise<void>;
 }
 
-export interface AuthContextType {
-  user: User | null;
-  isAdmin: boolean;
-  isLoading: boolean;
-  login: (username: string, password: string) => Promise<void>;
-  logout: () => void;
-}
-
 export type Theme = 'cartoon' | 'chinese';
 
 export interface ThemeContextType {
@@ -43,11 +33,4 @@ export interface LanguageContextType {
   language: Language;
   setLanguage: (lang: Language) => void;
   t: (key: string, params?: Record<string, string | number>) => string;
-}
-
-export enum LoadingState {
-  IDLE = 'IDLE',
-  LOADING = 'LOADING',
-  SUCCESS = 'SUCCESS',
-  ERROR = 'ERROR',
 }
