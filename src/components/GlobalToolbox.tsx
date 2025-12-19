@@ -13,9 +13,13 @@ import {
   X,
 } from 'lucide-react';
 import React, { useEffect, useRef, useState } from 'react';
+import type { Components } from 'react-markdown';
+import ReactMarkdown from 'react-markdown';
+import remarkGfm from 'remark-gfm';
 
-import { AiApi } from '@/api/ai';
+import { CodeBlock } from '@/components/CodeBlock';
 import { useLanguage } from '@/context/LanguageContext';
+import { aiService } from '@/services/ai';
 
 // Mock Playlist
 const PLAYLIST = [
@@ -41,6 +45,108 @@ interface ChatMessage {
   role: 'user' | 'assistant';
   content: string;
 }
+
+// Markdown 渲染组件 - 参照 BlogPost 的实现
+const MarkdownMessage: React.FC<{ content: string; isFullscreen: boolean }> = ({
+  content,
+  isFullscreen,
+}) => {
+  // ReactMarkdown 组件类型定义 - 使用与 BlogPost 相同的方式
+  const markdownComponents: Partial<Components> = {
+    // 代码块 - 复用 CodeBlock 组件
+    code: ({ className, children }) => {
+      const match = /language-(\w+)/.exec(className || '');
+      const codeString = String(children).replace(/\n$/, '');
+      const isInline = !match;
+
+      return isInline ? (
+        <CodeBlock inline={true}>{codeString}</CodeBlock>
+      ) : (
+        <CodeBlock language={match[1]} inline={false}>
+          {codeString}
+        </CodeBlock>
+      );
+    },
+    // 段落
+    p: ({ children }) => (
+      <p className="mb-2 leading-relaxed text-gray-800 font-medium">{children}</p>
+    ),
+    // 标题
+    h1: ({ children }) => (
+      <h1 className={`font-black mt-3 mb-2 text-gray-900 ${isFullscreen ? 'text-xl' : 'text-lg'}`}>
+        {children}
+      </h1>
+    ),
+    h2: ({ children }) => (
+      <h2
+        className={`font-black mt-3 mb-2 text-gray-900 ${isFullscreen ? 'text-lg' : 'text-base'}`}
+      >
+        {children}
+      </h2>
+    ),
+    h3: ({ children }) => (
+      <h3 className={`font-bold mt-2 mb-1 text-gray-900 ${isFullscreen ? 'text-base' : 'text-sm'}`}>
+        {children}
+      </h3>
+    ),
+    // 列表
+    ul: ({ children }) => (
+      <ul className="list-disc list-inside mb-2 space-y-1 text-gray-800 ml-2 font-medium">
+        {children}
+      </ul>
+    ),
+    ol: ({ children }) => (
+      <ol className="list-decimal list-inside mb-2 space-y-1 text-gray-800 ml-2 font-medium">
+        {children}
+      </ol>
+    ),
+    li: ({ children }) => <li className="leading-relaxed">{children}</li>,
+    // 引用块 - 使用卡通风格
+    blockquote: ({ children }) => (
+      <blockquote className="border-l-3 border-toon-purple bg-gradient-to-r from-purple-50 to-transparent pl-3 py-2 my-2 font-bold text-gray-700 rounded-r-lg">
+        {children}
+      </blockquote>
+    ),
+    // 链接
+    a: ({ href, children }) => (
+      <a
+        href={href}
+        className="text-toon-blue font-bold no-underline hover:underline decoration-2"
+        target="_blank"
+        rel="noopener noreferrer"
+      >
+        {children}
+      </a>
+    ),
+    // 表格
+    table: ({ children }) => (
+      <div className="overflow-x-auto my-2">
+        <table className="min-w-full border-collapse border-2 border-black">{children}</table>
+      </div>
+    ),
+    th: ({ children }) => (
+      <th className="border-2 border-black bg-gray-100 px-2 py-1 text-left font-bold text-xs">
+        {children}
+      </th>
+    ),
+    td: ({ children }) => (
+      <td className="border-2 border-black px-2 py-1 text-xs font-medium">{children}</td>
+    ),
+    // 分割线
+    hr: () => <hr className="my-3 border-t-2 border-gray-300" />,
+    // 加粗和斜体
+    strong: ({ children }) => <strong className="font-black text-gray-900">{children}</strong>,
+    em: ({ children }) => <em className="italic text-gray-700">{children}</em>,
+  };
+
+  return (
+    <div className="prose-chat max-w-none">
+      <ReactMarkdown remarkPlugins={[remarkGfm]} components={markdownComponents}>
+        {content}
+      </ReactMarkdown>
+    </div>
+  );
+};
 
 export const GlobalToolbox: React.FC = () => {
   const { t } = useLanguage();
@@ -120,7 +226,7 @@ export const GlobalToolbox: React.FC = () => {
   useEffect(() => {
     const checkHealth = async () => {
       try {
-        await AiApi.healthCheck();
+        await aiService.healthCheck();
         setChatError('');
       } catch (error) {
         console.error('AI service health check failed:', error);
@@ -152,7 +258,7 @@ export const GlobalToolbox: React.FC = () => {
 
     try {
       // 调用后端 chat API - 后端通过 sessionId 管理历史
-      const response = await AiApi.chat({
+      const response = await aiService.chat({
         message: userMsg,
         sessionId: sessionIdRef.current || undefined, // 首次为空,后端会生成
       });
@@ -194,13 +300,6 @@ export const GlobalToolbox: React.FC = () => {
   const toggleFullscreen = () => {
     setIsFullscreen(!isFullscreen);
   };
-
-  // 清空聊天 - 重置会话
-  // const handleClearChat = () => {
-  //   setMessages([]);
-  //   sessionIdRef.current = '';
-  //   setChatError('');
-  // };
 
   return (
     <div className="fixed bottom-2 right-2 sm:bottom-4 sm:right-4 z-[100] flex flex-col items-end font-sans">
@@ -483,7 +582,7 @@ export const GlobalToolbox: React.FC = () => {
                       style={{ animationDelay: `${idx * 50}ms` }}
                     >
                       <div
-                        className={`rounded-2xl border-3 border-black font-medium shadow-toon-sm ${
+                        className={`rounded-2xl border-3 border-black shadow-toon-sm ${
                           isFullscreen
                             ? 'max-w-[90%] sm:max-w-[85%] p-3.5 sm:p-4 text-sm sm:text-base'
                             : 'max-w-[85%] sm:max-w-[80%] p-2.5 sm:p-3 text-xs sm:text-sm'
@@ -493,7 +592,11 @@ export const GlobalToolbox: React.FC = () => {
                             : 'bg-white text-gray-900 rounded-bl-md'
                         }`}
                       >
-                        {msg.content}
+                        {msg.role === 'assistant' ? (
+                          <MarkdownMessage content={msg.content} isFullscreen={isFullscreen} />
+                        ) : (
+                          <span className="font-medium">{msg.content}</span>
+                        )}
                       </div>
                     </div>
                   ))}
