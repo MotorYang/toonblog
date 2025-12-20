@@ -156,7 +156,7 @@ export const Dashboard: React.FC = () => {
                       <span
                         className={`w-3 h-3 rounded-full border-2 border-black ${getCategoryColor(index)}`}
                       ></span>
-                      {cat}
+                      {t('category.' + cat)}
                     </span>
                     <span className="bg-gray-100 border-2 border-black px-2 py-0.5 rounded-lg text-xs">
                       {count} 篇
@@ -284,7 +284,7 @@ export const Dashboard: React.FC = () => {
                     </td>
                     <td className="p-3 md:p-4 text-center hidden sm:table-cell">
                       <span className="bg-gradient-to-r from-gray-100 to-white border-2 border-black px-3 py-1.5 rounded-lg text-xs font-black uppercase shadow-toon-sm">
-                        {post.category}
+                        {t('category.' + post.category)}
                       </span>
                     </td>
                     <td className="p-3 md:p-4 text-right font-black hidden sm:table-cell">
