@@ -21,4 +21,6 @@ export interface BlogContextType {
   deletePost: (id: string) => Promise<void>;
   getPost: (id: string) => Article | undefined;
   incrementViews: (id: string) => Promise<void>;
+  refreshPosts: () => Promise<void>;
+  refreshOnePost: (id: string) => Promise<void>;
 }

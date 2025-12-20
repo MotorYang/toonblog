@@ -71,9 +71,43 @@ export const BlogProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   };
 
+  const refreshPosts = async () => {
+    setIsLoading(true);
+    try {
+      const data = await ArticleApi.getAllArticles();
+      setPosts(data);
+    } catch (error) {
+      console.error('Failed to fetch posts', error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const refreshOnePost = async (id: string) => {
+    setIsLoading(true);
+    try {
+      const data = await ArticleApi.getArticleById(id);
+      setPosts((prev) => prev.map((post) => (post.id === id ? { ...data } : post)));
+    } catch (error) {
+      console.error('Failed to fetch posts', error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   return (
     <BlogContext.Provider
-      value={{ posts, isLoading, addPost, updatePost, deletePost, getPost, incrementViews }}
+      value={{
+        posts,
+        isLoading,
+        addPost,
+        updatePost,
+        deletePost,
+        getPost,
+        incrementViews,
+        refreshPosts,
+        refreshOnePost,
+      }}
     >
       {children}
     </BlogContext.Provider>

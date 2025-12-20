@@ -15,7 +15,7 @@ import { GenerateContentResponse } from '@/types/ai';
 export const EditPost: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const { getPost, updatePost } = useBlogStore();
+  const { getPost, updatePost, refreshOnePost } = useBlogStore();
   const { isAdmin } = userAuthStore();
   const { t, language } = useLanguage();
 
@@ -156,6 +156,7 @@ export const EditPost: React.FC = () => {
     };
 
     await updatePost(updatedPost);
+    await refreshOnePost(updatedPost.id);
     navigate(`/post/${id}`);
   };
 
