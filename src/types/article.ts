@@ -11,9 +11,6 @@ export interface Article {
   views: number;
 }
 
-/**
- * 创建文章的请求 DTO
- */
 export interface ArticleCreateDTO {
   title: string;
   excerpt: string;
@@ -23,4 +20,13 @@ export interface ArticleCreateDTO {
   category: string;
   imageUrl?: string;
   tags: string[];
+}
+
+export interface BlogContextType {
+  posts: Article[];
+  isLoading: boolean;
+  addPost: (post: Article) => Promise<void>;
+  deletePost: (id: string) => Promise<void>;
+  getPost: (id: string) => Article | undefined;
+  incrementViews: (id: string) => Promise<void>;
 }

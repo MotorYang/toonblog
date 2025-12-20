@@ -23,8 +23,7 @@ import { useLanguage } from '@/context/LanguageContext';
 import { aiService } from '@/services/ai';
 import { userAuthStore } from '@/stores/userAuthStore.ts';
 import { GenerateContentResponse } from '@/types/ai';
-
-import { Article } from '../../types.ts';
+import { Article } from '@/types/article';
 
 export const CreatePost: React.FC = () => {
   const navigate = useNavigate();
