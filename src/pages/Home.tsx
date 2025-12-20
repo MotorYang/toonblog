@@ -84,7 +84,7 @@ export const Home: React.FC = () => {
         (post) =>
           post.title.toLowerCase().includes(query) ||
           post.excerpt.toLowerCase().includes(query) ||
-          post.tags.some((tag) => tag.toLowerCase().includes(query)),
+          post.tags?.some((tag) => tag.toLowerCase().includes(query)),
       );
     }
 
@@ -476,7 +476,7 @@ export const Home: React.FC = () => {
                             )}
                             {t(`category.${post.category}`)}
                           </span>
-                          {post.tags.slice(0, 2).map((tag) => (
+                          {post.tags?.slice(0, 2).map((tag) => (
                             <span
                               key={tag}
                               className="bg-white text-gray-900 px-2 py-0.5 rounded-md text-xs font-bold border-2 border-black flex items-center gap-1 shadow-toon-sm hover:shadow-toon transition-shadow"
@@ -585,7 +585,7 @@ export const Home: React.FC = () => {
                                 )}
                                 {t(`category.${post.category}`)}
                               </span>
-                              {post.tags.slice(0, 3).map((tag) => (
+                              {post.tags?.slice(0, 3).map((tag) => (
                                 <span
                                   key={tag}
                                   className="bg-white text-gray-900 px-2 py-0.5 rounded-md text-xs font-bold border-2 border-black flex items-center gap-1 shadow-toon-sm"
