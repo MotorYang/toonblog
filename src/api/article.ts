@@ -1,4 +1,4 @@
-import { Article, ArticleCreateDTO } from '@/types/article.ts'; // 假设你有一个 http 工具类
+import { Article, ArticleCreateDTO } from '@/types/article.ts';
 import http from '@/utils/request/http';
 
 /**
@@ -23,6 +23,13 @@ export const ArticleApi = {
    */
   createArticle: (article: ArticleCreateDTO): Promise<Article> =>
     http.post('/cartoon/articles/create', article),
+
+  /**
+   * 更新文章
+   * PUT /articles/update
+   */
+  updateArticle: (article: Article): Promise<Article> =>
+    http.put('/cartoon/articles/update', article),
 
   /**
    * 删除文章
