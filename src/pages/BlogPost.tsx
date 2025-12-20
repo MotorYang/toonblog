@@ -1,4 +1,15 @@
-import { ArrowLeft, Calendar, Clock, Eye, Sparkles, Tag, Trash2, User } from 'lucide-react';
+import {
+  ArrowLeft,
+  Calendar,
+  Clock,
+  Edit,
+  Eye,
+  Shield,
+  Sparkles,
+  Tag,
+  Trash2,
+  User,
+} from 'lucide-react';
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import type { Components } from 'react-markdown';
 import ReactMarkdown from 'react-markdown';
@@ -18,6 +29,7 @@ import { useReadPosts } from '@/hooks/UseReadPosts';
 import { aiService } from '@/services/ai';
 import { userAuthStore } from '@/stores/userAuthStore';
 import { SummaryResponse } from '@/types/ai';
+import { formatDate } from '@/utils/common.ts';
 import { calculateReadingTime, formatReadingTime, getAdjacentPosts } from '@/utils/Postutils';
 
 export const BlogPost: React.FC = () => {
@@ -225,7 +237,7 @@ export const BlogPost: React.FC = () => {
             </span>
             <span className="flex items-center gap-1.5 bg-gradient-to-r from-toon-blue to-cyan-300 px-3 py-1.5 border-2 border-black rounded-lg font-black text-xs md:text-sm shadow-toon-sm hover:shadow-toon transition-all hover:scale-105 text-white">
               <Calendar size={14} />
-              {post.date}
+              {formatDate(post.date)}
             </span>
             <span className="flex items-center gap-1.5 bg-gradient-to-r from-white to-gray-100 px-3 py-1.5 border-2 border-black rounded-lg font-black text-xs md:text-sm shadow-toon-sm hover:shadow-toon transition-all hover:scale-105">
               <Eye size={14} className="text-toon-purple" />
@@ -244,6 +256,9 @@ export const BlogPost: React.FC = () => {
               className="flex flex-wrap gap-1.5 mb-5 animate-in fade-in slide-in-from-right-4 duration-500"
               style={{ animationDelay: '400ms' }}
             >
+              <span className="flex items-center gap-1 bg-gradient-to-r from-gray-900 to-gray-700 text-white px-2.5 py-1 border-2 border-black rounded-md font-black text-xs shadow-toon-sm">
+                {t('category.' + post.category)}
+              </span>
               {post.tags.map((tag, index) => (
                 <span
                   key={index}
@@ -254,9 +269,6 @@ export const BlogPost: React.FC = () => {
                   {tag}
                 </span>
               ))}
-              <span className="flex items-center gap-1 bg-gradient-to-r from-gray-900 to-gray-700 text-white px-2.5 py-1 border-2 border-black rounded-md font-black text-xs shadow-toon-sm">
-                {post.category}
-              </span>
             </div>
           )}
 
@@ -328,21 +340,33 @@ export const BlogPost: React.FC = () => {
 
           {/* Admin Actions - 紧凑管理操作 */}
           {isAdmin && (
-            <div
-              className="mt-8 pt-5 border-t-3 border-dashed border-gray-300 flex flex-col sm:flex-row justify-between items-center gap-3 animate-in fade-in slide-in-from-bottom-4 duration-500"
-              style={{ animationDelay: '700ms' }}
-            >
-              <div className="flex items-center gap-2 text-xs font-bold text-gray-600">
-                <div className="w-1.5 h-1.5 bg-toon-red rounded-full animate-pulse"></div>
+            <div className="mt-8 pt-6 border-t-3 border-dashed border-gray-300">
+              <h3 className="text-lg font-black mb-4 text-gray-900 flex items-center gap-2">
+                <Shield size={20} className="text-toon-purple" />
                 {t('post.admin.area')}
+              </h3>
+
+              <div className="flex flex-wrap gap-3">
+                {/* 编辑按钮 */}
+                <ToonButton
+                  variant="secondary"
+                  onClick={() => navigate(`/edit/${post.id}`)}
+                  className="flex-1 min-w-[200px]"
+                >
+                  <Edit size={18} className="mr-2" />
+                  {t('post.edit_button')}
+                </ToonButton>
+
+                {/* 删除按钮 */}
+                <ToonButton
+                  variant="danger"
+                  onClick={() => setIsDeleteModalOpen(true)}
+                  className="flex-1 min-w-[200px]"
+                >
+                  <Trash2 size={18} className="mr-2" />
+                  {t('post.delete')}
+                </ToonButton>
               </div>
-              <ToonButton
-                variant="danger"
-                onClick={() => setIsDeleteModalOpen(true)}
-                className="shadow-toon hover:shadow-toon-lg text-sm"
-              >
-                <Trash2 size={18} className="mr-2" /> {t('post.delete')}
-              </ToonButton>
             </div>
           )}
         </ToonCard>

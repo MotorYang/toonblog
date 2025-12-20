@@ -2,8 +2,7 @@ import { ScrollText, Smile } from 'lucide-react';
 import React from 'react';
 
 import { useTheme } from '@/context/ThemeContext';
-
-import { Theme } from '../../types.ts';
+import { Theme } from '@/types/theme';
 
 export const ThemeSelector: React.FC = () => {
   const { theme, setTheme } = useTheme();

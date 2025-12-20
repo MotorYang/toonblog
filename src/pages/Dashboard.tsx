@@ -156,7 +156,7 @@ export const Dashboard: React.FC = () => {
                       <span
                         className={`w-3 h-3 rounded-full border-2 border-black ${getCategoryColor(index)}`}
                       ></span>
-                      {cat}
+                      {t('category.' + cat)}
                     </span>
                     <span className="bg-gray-100 border-2 border-black px-2 py-0.5 rounded-lg text-xs">
                       {count} 篇
@@ -184,40 +184,97 @@ export const Dashboard: React.FC = () => {
           style={{ animationDelay: '300ms' }}
         >
           <ToonCard className="flex flex-col h-full">
-            <div className="flex items-center gap-2 mb-4 md:mb-6">
-              <div className="bg-toon-red p-2 border-2 border-black rounded-lg">
-                <TrendingUp size={20} className="text-white" />
+            <div className="flex items-center justify-between mb-4 md:mb-6">
+              <div className="flex items-center gap-2">
+                <div className="bg-toon-red p-2 border-2 border-black rounded-lg">
+                  <TrendingUp size={20} className="text-white" />
+                </div>
+                <h3 className="text-xl md:text-2xl font-black">{t('dash.growth')}</h3>
               </div>
-              <h3 className="text-xl md:text-2xl font-black">{t('dash.growth')}</h3>
+              <div className="text-right">
+                <p className="text-2xl font-black text-toon-red">
+                  {stats.sortedMonths.length > 0
+                    ? stats.monthlyGrowth[stats.sortedMonths[stats.sortedMonths.length - 1]]
+                    : 0}
+                </p>
+                <p className="text-xs font-bold text-gray-500">本月发布</p>
+              </div>
             </div>
-            <div className="flex items-end gap-2 md:gap-3 h-48 md:h-56 border-b-4 border-black pb-2 px-2 overflow-x-auto">
-              {stats.sortedMonths.map((month, index) => {
-                const count = stats.monthlyGrowth[month];
-                const maxCount = Math.max(...Object.values(stats.monthlyGrowth));
-                const heightPercentage = (count / maxCount) * 100;
-                const displayDate = month.slice(2);
 
-                return (
-                  <div
-                    key={month}
-                    className="flex flex-col items-center gap-1 min-w-[3rem] flex-1 group animate-in fade-in slide-in-from-bottom-2 duration-500"
-                    style={{ animationDelay: `${index * 50}ms` }}
-                  >
-                    <span className="font-black text-xs bg-white border-2 border-black rounded-full w-7 h-7 flex items-center justify-center shadow-toon-sm">
-                      {count}
-                    </span>
+            <div className="relative">
+              {/* Y轴参考线 */}
+              <div className="absolute left-0 right-0 h-48 md:h-56 flex flex-col justify-between pointer-events-none">
+                {(() => {
+                  const maxCount = Math.max(...Object.values(stats.monthlyGrowth), 1);
+                  const step = Math.ceil(maxCount / 4);
+                  return [4, 3, 2, 1, 0].map((i) => {
+                    const value = i * step;
+                    return (
+                      <div key={i} className="flex items-center">
+                        <span className="text-[10px] font-bold text-gray-400 mr-2 w-6 text-right">
+                          {value}
+                        </span>
+                        <div className="flex-1 border-t-2 border-dashed border-gray-200"></div>
+                      </div>
+                    );
+                  });
+                })()}
+              </div>
+
+              {/* 柱状图 */}
+              <div className="flex items-end gap-2 md:gap-3 h-48 md:h-56 border-b-4 border-black pl-10 pr-2 overflow-x-auto">
+                {stats.sortedMonths.map((month, index) => {
+                  const count = stats.monthlyGrowth[month];
+                  const maxCount = Math.max(...Object.values(stats.monthlyGrowth));
+                  const heightPercentage = (count / maxCount) * 100;
+                  const displayDate = month.slice(2);
+                  const isLatest = index === stats.sortedMonths.length - 1;
+
+                  return (
                     <div
-                      className="w-full bg-gradient-to-t from-toon-red to-red-400 border-3 border-black rounded-t-xl transition-all hover:from-red-500 hover:to-red-300 group-hover:scale-105 shadow-toon-sm"
-                      style={{ height: `${heightPercentage}%`, minHeight: '12px' }}
-                    />
-                    <span className="font-bold text-[10px] transform -rotate-45 origin-top-left mt-2 whitespace-nowrap text-gray-600">
-                      {displayDate}
-                    </span>
-                  </div>
-                );
-              })}
+                      key={month}
+                      className="flex flex-col items-center min-w-[3rem] flex-1 group animate-in fade-in slide-in-from-bottom-2 duration-500 relative h-full justify-end pb-8"
+                      style={{ animationDelay: `${index * 50}ms` }}
+                    >
+                      {/* 悬浮提示 */}
+                      <div className="absolute -top-16 left-1/2 -translate-x-1/2 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-10">
+                        <div className="bg-gray-900 text-white px-3 py-2 rounded-lg border-2 border-black shadow-toon-lg whitespace-nowrap">
+                          <p className="font-black text-sm">{month}</p>
+                          <p className="text-xs font-bold opacity-80">{count} 篇文章</p>
+                        </div>
+                        <div className="w-0 h-0 border-l-4 border-r-4 border-t-4 border-transparent border-t-gray-900 mx-auto"></div>
+                      </div>
+
+                      {/* 数值标签 */}
+                      <div
+                        className={`font-black text-xs ${isLatest ? 'bg-toon-red text-white' : 'bg-white text-black'} border-2 border-black rounded-full w-7 h-7 flex items-center justify-center shadow-toon-sm group-hover:scale-110 transition-transform mb-1`}
+                      >
+                        {count}
+                      </div>
+
+                      {/* 柱子 */}
+                      <div
+                        className={`w-full ${isLatest ? 'bg-gradient-to-t from-toon-red to-red-400' : 'bg-gradient-to-t from-gray-400 to-gray-300'} border-3 border-black rounded-t-xl shadow-toon-sm`}
+                        style={{ height: `${heightPercentage}%`, minHeight: '20px' }}
+                      ></div>
+
+                      {/* 月份标签 */}
+                      <span className="font-bold text-[10px] text-gray-600 absolute bottom-0">
+                        {displayDate}
+                      </span>
+                    </div>
+                  );
+                })}
+              </div>
             </div>
-            <p className="text-center font-bold text-gray-500 text-sm mt-4">{t('dash.timeline')}</p>
+
+            <div className="flex items-center justify-between mt-4 pt-3 border-t-2 border-dashed border-gray-200">
+              <p className="font-bold text-gray-500 text-xs">{t('dash.timeline')}</p>
+              <div className="flex items-center gap-2 text-xs font-bold text-gray-500">
+                <div className="w-3 h-3 bg-toon-red border-2 border-black rounded"></div>
+                <span>最新月份</span>
+              </div>
+            </div>
           </ToonCard>
         </div>
       </div>
@@ -284,7 +341,7 @@ export const Dashboard: React.FC = () => {
                     </td>
                     <td className="p-3 md:p-4 text-center hidden sm:table-cell">
                       <span className="bg-gradient-to-r from-gray-100 to-white border-2 border-black px-3 py-1.5 rounded-lg text-xs font-black uppercase shadow-toon-sm">
-                        {post.category}
+                        {t('category.' + post.category)}
                       </span>
                     </td>
                     <td className="p-3 md:p-4 text-right font-black hidden sm:table-cell">

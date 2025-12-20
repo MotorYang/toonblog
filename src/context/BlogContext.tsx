@@ -1,8 +1,7 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
 
 import { ArticleApi } from '@/api/article';
-
-import { Article, BlogContextType } from '../../types.ts';
+import { Article, BlogContextType } from '@/types/article';
 
 const BlogContext = createContext<BlogContextType | undefined>(undefined);
 
@@ -28,12 +27,21 @@ export const BlogProvider: React.FC<{ children: React.ReactNode }> = ({ children
   }, []);
 
   const addPost = async (post: Article) => {
-    // Optimistic update could go here, but let's wait for API for consistency
     try {
       const newPost = await ArticleApi.createArticle(post);
       setPosts((prev) => [newPost, ...prev]);
     } catch (error) {
       console.error('Failed to create post', error);
+      throw error;
+    }
+  };
+
+  const updatePost = async (post: Article) => {
+    try {
+      const updatedPost = await ArticleApi.updateArticle(post);
+      setPosts((prev) => prev.map((p) => (p.id === updatedPost.id ? updatedPost : p)));
+    } catch (error) {
+      console.error('Failed to update post', error);
       throw error;
     }
   };
@@ -63,9 +71,43 @@ export const BlogProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   };
 
+  const refreshPosts = async () => {
+    setIsLoading(true);
+    try {
+      const data = await ArticleApi.getAllArticles();
+      setPosts(data);
+    } catch (error) {
+      console.error('Failed to fetch posts', error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const refreshOnePost = async (id: string) => {
+    setIsLoading(true);
+    try {
+      const data = await ArticleApi.getArticleById(id);
+      setPosts((prev) => prev.map((post) => (post.id === id ? { ...data } : post)));
+    } catch (error) {
+      console.error('Failed to fetch posts', error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   return (
     <BlogContext.Provider
-      value={{ posts, isLoading, addPost, deletePost, getPost, incrementViews }}
+      value={{
+        posts,
+        isLoading,
+        addPost,
+        updatePost,
+        deletePost,
+        getPost,
+        incrementViews,
+        refreshPosts,
+        refreshOnePost,
+      }}
     >
       {children}
     </BlogContext.Provider>

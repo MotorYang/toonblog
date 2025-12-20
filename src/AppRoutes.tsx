@@ -6,6 +6,7 @@ import { Layout } from '@/layout/Layout.tsx';
 import { BlogPost } from '@/pages/BlogPost';
 import { CreatePost } from '@/pages/CreatePost';
 import { Dashboard } from '@/pages/Dashboard';
+import { EditPost } from '@/pages/EditPost';
 import { Home } from '@/pages/Home';
 import { Settings } from '@/pages/Settings';
 import { setNavigateFunction } from '@/utils/request/http';
@@ -29,6 +30,14 @@ const AppRoutes: React.FC = () => {
           element={
             <ProtectedRoute>
               <CreatePost />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/edit/:id"
+          element={
+            <ProtectedRoute>
+              <EditPost />
             </ProtectedRoute>
           }
         />
