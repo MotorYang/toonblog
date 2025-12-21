@@ -1,10 +1,18 @@
-import { Article, ArticleCreateDTO } from '@/types/article.ts';
+import { Article, ArticleCreateDTO, ArticleFilter } from '@/types/article.ts';
+import { PageResult, QueryRequest } from '@/types/query.ts';
 import http from '@/utils/request/http';
 
 /**
  * Article API
  */
-export const ArticleApi = {
+export const articleApi = {
+  /**
+   * 分页查询文章
+   * POST /articles/query
+   */
+  query: (query: QueryRequest<ArticleFilter>): Promise<PageResult<Article>> =>
+    http.post('/cartoon/articles/query', query),
+
   /**
    * 获取所有文章
    * GET /articles/all

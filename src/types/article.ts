@@ -13,6 +13,11 @@ export interface Article {
 
 export type ArticleCreateDTO = Omit<Article, 'id' | 'views'>;
 
+export interface ArticleFilter {
+  title?: string;
+  category?: string;
+}
+
 export interface BlogContextType {
   posts: Article[];
   isLoading: boolean;

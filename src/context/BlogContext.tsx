@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
 
-import { ArticleApi } from '@/api/article';
+import { articleService } from '@/services/article';
 import { Article, BlogContextType } from '@/types/article';
 
 const BlogContext = createContext<BlogContextType | undefined>(undefined);
@@ -14,21 +14,20 @@ export const BlogProvider: React.FC<{ children: React.ReactNode }> = ({ children
     const fetchPosts = async () => {
       setIsLoading(true);
       try {
-        const data = await ArticleApi.getAllArticles();
-        setPosts(data);
+        const queryResult = await articleService.query(1, 9, {});
+        setPosts(queryResult.records);
       } catch (error) {
         console.error('Failed to fetch posts', error);
       } finally {
         setIsLoading(false);
       }
     };
-
     fetchPosts();
   }, []);
 
   const addPost = async (post: Article) => {
     try {
-      const newPost = await ArticleApi.createArticle(post);
+      const newPost = await articleService.addArticle(post);
       setPosts((prev) => [newPost, ...prev]);
     } catch (error) {
       console.error('Failed to create post', error);
@@ -38,7 +37,7 @@ export const BlogProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const updatePost = async (post: Article) => {
     try {
-      const updatedPost = await ArticleApi.updateArticle(post);
+      const updatedPost = await articleService.updateArticle(post);
       setPosts((prev) => prev.map((p) => (p.id === updatedPost.id ? updatedPost : p)));
     } catch (error) {
       console.error('Failed to update post', error);
@@ -48,7 +47,7 @@ export const BlogProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const deletePost = async (id: string) => {
     try {
-      await ArticleApi.deleteArticle(id);
+      await articleService.deleteArticle(id);
       setPosts((prev) => prev.filter((p) => p.id !== id));
     } catch (error) {
       console.error('Failed to delete post', error);
@@ -62,7 +61,7 @@ export const BlogProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const incrementViews = async (id: string) => {
     try {
-      const newViewCount = await ArticleApi.incrementViews(id);
+      const newViewCount = await articleService.incrementViews(id);
       setPosts((prev) =>
         prev.map((post) => (post.id === id ? { ...post, views: newViewCount } : post)),
       );
@@ -74,7 +73,7 @@ export const BlogProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const refreshPosts = async () => {
     setIsLoading(true);
     try {
-      const data = await ArticleApi.getAllArticles();
+      const data = await articleService.getAllArticles();
       setPosts(data);
     } catch (error) {
       console.error('Failed to fetch posts', error);
@@ -86,7 +85,7 @@ export const BlogProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const refreshOnePost = async (id: string) => {
     setIsLoading(true);
     try {
-      const data = await ArticleApi.getArticleById(id);
+      const data = await articleService.getArticleById(id);
       setPosts((prev) => prev.map((post) => (post.id === id ? { ...data } : post)));
     } catch (error) {
       console.error('Failed to fetch posts', error);
