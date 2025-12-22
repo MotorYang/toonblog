@@ -245,8 +245,7 @@ export const Home: React.FC = () => {
                 {categories.map((cat, index) => {
                   const config = getCategoryConfig(cat);
                   const isAll = cat === 'all';
-                  const isSelected =
-                    filters.category === cat || (isAll && filters.category === 'all');
+                  const isSelected = filters.category === cat || (isAll && filters.category === '');
 
                   return (
                     <button
