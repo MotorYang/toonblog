@@ -1,7 +1,7 @@
 export interface QueryRequest<F> {
   page: number;
   size: number;
-  filter: F; /* filter可以传null，但不能少了这个参数 */
+  filter: F;
 }
 
 export interface PageResult<T> {
@@ -9,4 +9,12 @@ export interface PageResult<T> {
   total: number;
   page: number;
   size: number;
+}
+
+// 分页参数类型
+export interface PaginationParams {
+  currentPage: number;
+  pageSize: number;
+  totalPages: number;
+  totalItems: number;
 }
