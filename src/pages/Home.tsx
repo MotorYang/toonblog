@@ -50,6 +50,7 @@ export const Home: React.FC = () => {
   });
   const [showShortcuts, setShowShortcuts] = useState(false);
   const [title, setTitle] = useState<string>('');
+  const [pageInput, setPageInput] = useState<string>('');
 
   // Category configuration
   const categoryConfig = [
@@ -117,6 +118,45 @@ export const Home: React.FC = () => {
   const cleanFilters = () => {
     setTitle('');
     resetFilters();
+  };
+
+  // 处理页码输入
+  const handlePageInputChange = (value: string) => {
+    // 只允许数字
+    if (value === '' || /^\d+$/.test(value)) {
+      setPageInput(value);
+    }
+  };
+
+  // 跳转到指定页码
+  const handlePageJump = () => {
+    if (pageInput === '') return;
+
+    const targetPage = parseInt(pageInput, 10);
+
+    // 严格校验：必须是有效数字
+    if (isNaN(targetPage) || targetPage < 1) {
+      // 如果输入无效，重置输入框
+      setPageInput('');
+      return;
+    }
+
+    // 如果页码大于最大页码，跳转到最后一页
+    const finalPage = targetPage > pagination.totalPages ? pagination.totalPages : targetPage;
+
+    // 跳转到目标页
+    updatePage(finalPage);
+    setPageInput('');
+  };
+
+  // 处理回车键跳转
+  const handlePageInputKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'Enter') {
+      handlePageJump();
+    } else if (e.key === 'Escape') {
+      setPageInput('');
+      e.currentTarget.blur();
+    }
   };
 
   const hasActiveFilters =
@@ -550,32 +590,137 @@ export const Home: React.FC = () => {
             </div>
           )}
 
-          {/* Pagination Controls */}
+          {/* Pagination Controls - Enhanced with Page Jump */}
           {pagination.totalPages > 0 && (
-            <div className="flex justify-center items-center gap-2 md:gap-3 mt-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
-              <button
-                onClick={() => updatePage(pagination.currentPage - 1)}
-                disabled={pagination.currentPage === 1 || isLoading}
-                className="p-2 md:p-2.5 bg-white text-gray-900 border-3 border-black rounded-lg shadow-toon hover:shadow-toon-lg hover:bg-toon-yellow disabled:opacity-30 disabled:cursor-not-allowed disabled:shadow-toon-sm disabled:hover:bg-white active:translate-y-0.5 active:shadow-toon-sm transition-all group"
-                aria-label="上一页"
-              >
-                <ChevronLeft size={20} strokeWidth={3} className="group-hover:animate-pulse" />
-              </button>
+            <div className="mt-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
+              {/* Desktop Layout */}
+              <div className="hidden md:flex md:flex-row justify-center items-center gap-3">
+                {/* Previous Button */}
+                <button
+                  onClick={() => updatePage(pagination.currentPage - 1)}
+                  disabled={pagination.currentPage === 1 || isLoading}
+                  className="p-2.5 bg-white text-gray-900 border-3 border-black rounded-lg shadow-toon hover:shadow-toon-lg hover:bg-toon-yellow disabled:opacity-30 disabled:cursor-not-allowed disabled:shadow-toon-sm disabled:hover:bg-white active:translate-y-0.5 active:shadow-toon-sm transition-all group"
+                  aria-label="上一页"
+                >
+                  <ChevronLeft size={20} strokeWidth={3} className="group-hover:animate-pulse" />
+                </button>
 
-              <div className="px-4 md:px-6 py-2 md:py-2.5 bg-gradient-to-br from-white to-gray-100 text-gray-900 border-3 border-black rounded-lg shadow-toon font-black text-sm md:text-base min-w-[100px] md:min-w-[120px] text-center">
-                <span className="text-toon-blue">{pagination.currentPage}</span>
-                <span className="text-gray-400 mx-1.5">/</span>
-                <span className="text-gray-600">{pagination.totalPages}</span>
+                {/* Current Page Display */}
+                <div className="px-6 py-2.5 bg-gradient-to-br from-white to-gray-100 text-gray-900 border-3 border-black rounded-lg shadow-toon font-black text-base min-w-[120px] text-center">
+                  <span className="text-toon-blue">{pagination.currentPage}</span>
+                  <span className="text-gray-400 mx-1.5">/</span>
+                  <span className="text-gray-600">{pagination.totalPages}</span>
+                </div>
+
+                {/* Next Button */}
+                <button
+                  onClick={() => updatePage(pagination.currentPage + 1)}
+                  disabled={pagination.currentPage === pagination.totalPages || isLoading}
+                  className="p-2.5 bg-white text-gray-900 border-3 border-black rounded-lg shadow-toon hover:shadow-toon-lg hover:bg-toon-yellow disabled:opacity-30 disabled:cursor-not-allowed disabled:shadow-toon-sm disabled:hover:bg-white active:translate-y-0.5 active:shadow-toon-sm transition-all group"
+                  aria-label="下一页"
+                >
+                  <ChevronRight size={20} strokeWidth={3} className="group-hover:animate-pulse" />
+                </button>
+
+                {/* Page Jump Input - Only show if there are multiple pages */}
+                {pagination.totalPages > 1 && (
+                  <div className="flex items-center gap-2 ml-2">
+                    <span className="text-sm font-bold text-gray-600 whitespace-nowrap">
+                      跳转到
+                    </span>
+                    <input
+                      type="text"
+                      inputMode="numeric"
+                      pattern="[0-9]*"
+                      value={pageInput}
+                      onChange={(e) => handlePageInputChange(e.target.value)}
+                      onKeyDown={handlePageInputKeyDown}
+                      placeholder="页码"
+                      disabled={isLoading}
+                      className="w-20 px-3 py-2 border-3 border-black rounded-lg font-bold text-base text-center focus:outline-none focus:border-toon-blue focus:shadow-toon-lg transition-all text-gray-900 bg-white placeholder:text-gray-400 disabled:opacity-50 disabled:cursor-not-allowed"
+                    />
+                    <button
+                      onClick={handlePageJump}
+                      disabled={!pageInput || isLoading}
+                      className="px-4 py-2 bg-toon-blue text-white font-black border-3 border-black rounded-lg shadow-toon hover:shadow-toon-lg hover:bg-cyan-400 disabled:opacity-30 disabled:cursor-not-allowed disabled:hover:bg-toon-blue active:translate-y-0.5 active:shadow-toon-sm transition-all text-sm whitespace-nowrap"
+                    >
+                      Go
+                    </button>
+                  </div>
+                )}
               </div>
 
-              <button
-                onClick={() => updatePage(pagination.currentPage + 1)}
-                disabled={pagination.currentPage === pagination.totalPages || isLoading}
-                className="p-2 md:p-2.5 bg-white text-gray-900 border-3 border-black rounded-lg shadow-toon hover:shadow-toon-lg hover:bg-toon-yellow disabled:opacity-30 disabled:cursor-not-allowed disabled:shadow-toon-sm disabled:hover:bg-white active:translate-y-0.5 active:shadow-toon-sm transition-all group"
-                aria-label="下一页"
-              >
-                <ChevronRight size={20} strokeWidth={3} className="group-hover:animate-pulse" />
-              </button>
+              {/* Mobile Layout */}
+              <div className="flex flex-col gap-3 md:hidden">
+                {/* Navigation Buttons Row */}
+                <div className="flex justify-center items-center gap-2">
+                  {/* Previous Button */}
+                  <button
+                    onClick={() => updatePage(pagination.currentPage - 1)}
+                    disabled={pagination.currentPage === 1 || isLoading}
+                    className="flex-1 max-w-[120px] py-3 bg-white text-gray-900 border-3 border-black rounded-lg shadow-toon active:shadow-toon-sm disabled:opacity-30 disabled:cursor-not-allowed transition-all font-black text-sm flex items-center justify-center gap-1"
+                    aria-label="上一页"
+                  >
+                    <ChevronLeft size={18} strokeWidth={3} />
+                    <span>上一页</span>
+                  </button>
+
+                  {/* Current Page Display */}
+                  <div className="px-4 py-3 bg-gradient-to-br from-white to-gray-100 text-gray-900 border-3 border-black rounded-lg shadow-toon font-black text-base min-w-[100px] text-center">
+                    <span className="text-toon-blue">{pagination.currentPage}</span>
+                    <span className="text-gray-400 mx-1">/</span>
+                    <span className="text-gray-600">{pagination.totalPages}</span>
+                  </div>
+
+                  {/* Next Button */}
+                  <button
+                    onClick={() => updatePage(pagination.currentPage + 1)}
+                    disabled={pagination.currentPage === pagination.totalPages || isLoading}
+                    className="flex-1 max-w-[120px] py-3 bg-white text-gray-900 border-3 border-black rounded-lg shadow-toon active:shadow-toon-sm disabled:opacity-30 disabled:cursor-not-allowed transition-all font-black text-sm flex items-center justify-center gap-1"
+                    aria-label="下一页"
+                  >
+                    <span>下一页</span>
+                    <ChevronRight size={18} strokeWidth={3} />
+                  </button>
+                </div>
+
+                {/* Page Jump Input - Only show if there are multiple pages */}
+                {pagination.totalPages > 1 && (
+                  <div className="bg-gradient-to-br from-white to-gray-50 border-3 border-black rounded-lg p-3 shadow-toon">
+                    <div className="flex items-center gap-2">
+                      <span className="text-sm font-bold text-gray-600 whitespace-nowrap flex-shrink-0">
+                        跳转到第
+                      </span>
+                      <input
+                        type="text"
+                        inputMode="numeric"
+                        pattern="[0-9]*"
+                        value={pageInput}
+                        onChange={(e) => handlePageInputChange(e.target.value)}
+                        onKeyDown={handlePageInputKeyDown}
+                        placeholder="页码"
+                        disabled={isLoading}
+                        className="flex-1 min-w-0 px-3 py-2.5 border-3 border-black rounded-lg font-bold text-base text-center focus:outline-none focus:border-toon-blue focus:shadow-toon-lg transition-all text-gray-900 bg-white placeholder:text-gray-400 disabled:opacity-50 disabled:cursor-not-allowed"
+                      />
+                      <span className="text-sm font-bold text-gray-600 whitespace-nowrap flex-shrink-0">
+                        页
+                      </span>
+                      <button
+                        onClick={handlePageJump}
+                        disabled={!pageInput || isLoading}
+                        className="px-5 py-2.5 bg-toon-blue text-white font-black border-3 border-black rounded-lg shadow-toon active:shadow-toon-sm disabled:opacity-30 disabled:cursor-not-allowed transition-all text-sm whitespace-nowrap flex-shrink-0"
+                      >
+                        跳转
+                      </button>
+                    </div>
+                    {pageInput && parseInt(pageInput, 10) > pagination.totalPages && (
+                      <div className="mt-2 text-xs font-bold text-toon-red text-center animate-in fade-in duration-200">
+                        将跳转到最后一页 ({pagination.totalPages})
+                      </div>
+                    )}
+                  </div>
+                )}
+              </div>
             </div>
           )}
         </>
