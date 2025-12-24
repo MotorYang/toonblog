@@ -5,20 +5,27 @@ import { persist } from 'zustand/middleware';
 import { Tip } from '@/components/GlobalTip';
 import { translate } from '@/context/LanguageContext';
 import { userService } from '@/services/userService';
-import type { TokenRefreshResponse, User, UserLoginResponse } from '@/types/auth';
+import type {
+  CaptchaResponse,
+  LoginForm,
+  TokenRefreshResponse,
+  User,
+  UserLoginResponse,
+} from '@/types/auth';
 
 interface AuthState {
   user: User | null;
-  token: string | null;
+  accessToken: string | null;
   refreshToken: string | null;
   isAdmin: boolean;
   isLoading: boolean;
   tokenExpiresAt: number | null;
   refreshTimerId: NodeJS.Timeout | null;
 
+  captcha: () => Promise<CaptchaResponse>;
   isLoggedIn: () => boolean;
   isTokenExpired: () => boolean;
-  login: (account: string, password: string) => Promise<void>;
+  login: (loginForm: LoginForm) => Promise<void>;
   logout: () => Promise<void>;
   setUser: (userLoginResponse: UserLoginResponse | null) => void;
   refreshAccessToken: () => Promise<void>;
@@ -33,7 +40,7 @@ export const userAuthStore = create<AuthState>()(
   persist(
     (set, get) => ({
       user: null,
-      token: null,
+      accessToken: null,
       refreshToken: null,
       isAdmin: false,
       isLoading: false,
@@ -41,8 +48,8 @@ export const userAuthStore = create<AuthState>()(
       refreshTimerId: null,
 
       isLoggedIn: () => {
-        const { user, token } = get();
-        return !!user && !!token;
+        const { user, accessToken } = get();
+        return !!user && !!accessToken;
       },
 
       isTokenExpired: () => {
@@ -51,15 +58,16 @@ export const userAuthStore = create<AuthState>()(
         return Date.now() >= tokenExpiresAt;
       },
 
-      login: async (account: string, password: string) => {
+      captcha: async (): Promise<CaptchaResponse> => {
+        return await userService.captcha();
+      },
+
+      login: async (loginForm: LoginForm) => {
         set({ isLoading: true });
         try {
-          const result: UserLoginResponse = await userService.login({
-            account,
-            password,
-          });
+          const result: UserLoginResponse = await userService.login(loginForm);
           // 处理角色信息
-          const roles = Array.isArray(result.roles) ? result.roles : [];
+          const roles = Array.isArray(result.userInfo.roles) ? result.userInfo.roles : [];
           const isAdminUser = roles.includes('admin');
 
           // 计算 token 过期时间
@@ -67,15 +75,15 @@ export const userAuthStore = create<AuthState>()(
             ? Date.now() + result.expiresIn * 1000
             : Date.now() + 24 * 60 * 60 * 1000;
           set({
-            user: result.user,
-            token: result.token,
+            user: result.userInfo,
+            accessToken: result.accessToken,
             refreshToken: result.refreshToken,
             isAdmin: isAdminUser,
             tokenExpiresAt: expiresAt,
           });
           // 启动自动刷新 token 的定时器
           get().scheduleTokenRefresh();
-          Tip.success(translate('auth.login.success') + result.user.name);
+          Tip.success(translate('auth.login.success') + result.userInfo.nickName);
         } catch (error) {
           console.error('Login failed:', error);
           throw error;
@@ -85,11 +93,11 @@ export const userAuthStore = create<AuthState>()(
       },
 
       logout: async () => {
-        const { token, refreshTimerId } = get();
+        const { accessToken, refreshTimerId } = get();
 
         try {
           // 调用后端登出接口(如果有token)
-          if (token) {
+          if (accessToken) {
             await userService.logout();
           }
         } catch (error) {
@@ -103,7 +111,7 @@ export const userAuthStore = create<AuthState>()(
           // 清理所有认证状态
           set({
             user: null,
-            token: null,
+            accessToken: null,
             refreshToken: null,
             isAdmin: false,
             tokenExpiresAt: null,
@@ -115,8 +123,8 @@ export const userAuthStore = create<AuthState>()(
       },
 
       setUser: (loginResponse: UserLoginResponse | null) => {
-        const isAdmin = loginResponse?.roles?.includes('admin') ?? false;
-        const user = loginResponse?.user;
+        const isAdmin = loginResponse?.userInfo?.roles?.includes('admin') ?? false;
+        const user = loginResponse?.userInfo;
         set({ user, isAdmin });
       },
 
@@ -138,7 +146,7 @@ export const userAuthStore = create<AuthState>()(
             : Date.now() + 24 * 60 * 60 * 1000;
 
           set({
-            token: result.token,
+            accessToken: result.accessToken,
             refreshToken: result.refreshToken || refreshToken,
             tokenExpiresAt: expiresAt,
           });
@@ -217,13 +225,13 @@ export const userAuthStore = create<AuthState>()(
       name: 'auth-storage',
       partialize: (state) => ({
         user: state.user,
-        token: state.token,
+        accessToken: state.accessToken,
         refreshToken: state.refreshToken,
         isAdmin: state.isAdmin,
         tokenExpiresAt: state.tokenExpiresAt,
       }),
       onRehydrateStorage: () => (state) => {
-        if (state?.token && state?.tokenExpiresAt) {
+        if (state?.accessToken && state?.tokenExpiresAt) {
           if (state.tokenExpiresAt > Date.now()) {
             state.scheduleTokenRefresh();
           } else {

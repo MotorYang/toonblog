@@ -1,11 +1,11 @@
-import { type TokenRefreshResponse, UserLoginResponse } from '@/types/auth';
+import { CaptchaResponse, type TokenRefreshResponse, UserLoginResponse } from '@/types/auth';
 import http from '@/utils/request/http';
 
 // ==================== 类型定义 ====================
 
 /** 登录请求参数 */
 export interface LoginParams {
-  account: string; // 账号（用户名）
+  username: string; // 账号（用户名）
   password: string; // 密码
   captcha?: string; // 验证码（可选）
   captchaId?: string; // 验证码ID（可选）
@@ -203,10 +203,10 @@ export function resetPassword(params: ResetPasswordParams): Promise<void> {
 
 /**
  * 获取验证码
- * @returns Promise<{ captchaId: string; captchaImage: string }>
+ * @returns Promise<CaptchaResponse>
  */
-export function getCaptcha(): Promise<{ captchaId: string; captchaImage: string }> {
-  return http.get<{ captchaId: string; captchaImage: string }>('/auth/captcha');
+export function getCaptcha(): Promise<CaptchaResponse> {
+  return http.get<CaptchaResponse>('/system/auth/captcha');
 }
 
 /**

@@ -15,7 +15,7 @@ import { ThemeSelector } from '../components/ThemeSelector.tsx';
 export const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const navigate = useNavigate();
   const location = useLocation();
-  const { user, isAdmin, login, logout } = userAuthStore();
+  const { user, isAdmin, login, logout, captcha } = userAuthStore();
   const { t } = useLanguage();
   const [isLoginOpen, setIsLoginOpen] = useState(false);
   const [isLogoutConfirmOpen, setIsLogoutConfirmOpen] = useState(false);
@@ -121,7 +121,7 @@ export const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) =>
                   title={t('nav.logout')}
                 >
                   <LogOut className="w-4 h-4" />
-                  <span>{user.name}</span>
+                  <span>{user.nickName}</span>
                 </button>
               ) : (
                 <button
@@ -222,7 +222,7 @@ export const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) =>
                     className="w-full flex items-center gap-3 p-3 border-2 border-black rounded-lg bg-gray-100 hover:bg-red-100 transition-colors font-bold text-sm text-gray-900"
                   >
                     <LogOut className="w-5 h-5" />
-                    <span>{user.name}</span>
+                    <span>{user.nickName}</span>
                   </button>
                 ) : (
                   <button
@@ -254,7 +254,12 @@ export const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) =>
         </div>
       </footer>
 
-      <LoginModal isOpen={isLoginOpen} onClose={() => setIsLoginOpen(false)} onLogin={login} />
+      <LoginModal
+        isOpen={isLoginOpen}
+        onClose={() => setIsLoginOpen(false)}
+        onLogin={login}
+        onGetCaptcha={captcha}
+      />
 
       <ConfirmDialog
         isOpen={isLogoutConfirmOpen}
