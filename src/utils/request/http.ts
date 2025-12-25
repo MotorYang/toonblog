@@ -10,6 +10,7 @@ import { Tip } from '@/components/GlobalTip';
 import { translate } from '@/context/LanguageContext';
 import { userAuthStore } from '@/stores/userAuthStore';
 import { BusinessError, HttpClient, HttpResponse, SuccessResponse } from '@/types/http';
+import { mapHttpError } from '@/utils/request/error.ts';
 
 let navigateToLogin: (() => void) | null = null;
 
@@ -51,11 +52,10 @@ axiosInstance.interceptors.response.use(
     if (isSuccessResponse(res)) {
       return response;
     }
-    Tip.error(translate('http.api.error') + ':' + res.msg);
+    Tip.error(res.msg);
     return Promise.reject(new BusinessError(res.code, res.msg, res.timestamp));
   },
   async (error: AxiosError<HttpResponse>) => {
-    console.error('这是一个错误:', error);
     if (error.response?.status === 401) {
       // Token 过期处理
       Tip.error(translate('auth.token.expired'));
@@ -68,7 +68,7 @@ axiosInstance.interceptors.response.use(
       return Promise.reject(error);
     }
 
-    const errorMsg = error.message || translate('common.error.network');
+    const errorMsg = mapHttpError(error);
     Tip.error(errorMsg);
     return Promise.reject(error);
   },

@@ -17,10 +17,6 @@ export const translations = {
     'auth.permission.denied': 'Permission denied',
     'auth.permission.adminOnly': 'Admin access only',
     'auth.permission.loginRequired': 'Please login first',
-    'auth.captcha': 'Captcha',
-    'auth.error_captcha_required': 'Please enter captcha code',
-    'auth.error_captcha_invalid': 'Invalid captcha code',
-    'auth.error_captcha_load': 'Failed to load captcha',
     // Nav
     'nav.home': 'Home',
     'nav.create': 'Create',
@@ -148,6 +144,10 @@ export const translations = {
     'login.error_fields': 'Please fill in both fields!',
     'login.error_failed': 'Login failed. Please try again.',
     'login.account_failed': 'Account Or Password failed. Please try again.',
+    'login.captcha': 'Captcha',
+    'login.error_captcha_required': 'Please enter captcha code',
+    'login.error_captcha_invalid': 'Invalid captcha code',
+    'login.error_captcha_load': 'Failed to load captcha',
     // Toolbox
     'tool.beats': 'Beats',
     'tool.chat': 'Chat',
@@ -174,10 +174,6 @@ export const translations = {
     'auth.permission.denied': '权限不足',
     'auth.permission.adminOnly': '仅管理员可访问',
     'auth.permission.loginRequired': '请先登录',
-    'auth.captcha': '验证码',
-    'auth.error_captcha_required': '请输入验证码',
-    'auth.error_captcha_invalid': '验证码错误',
-    'auth.error_captcha_load': '验证码加载失败，请重试',
     // Nav
     'nav.home': '首页',
     'nav.create': '创作',
@@ -306,6 +302,10 @@ export const translations = {
     'login.error_fields': '请填写所有字段！',
     'login.error_failed': '登录失败，请重试。',
     'login.account_failed': '用户名/密码不正确！',
+    'login.captcha': '验证码',
+    'login.error_captcha_required': '请输入验证码',
+    'login.error_captcha_invalid': '验证码错误',
+    'login.error_captcha_load': '验证码加载失败，请重试',
     // Toolbox
     'tool.beats': '音乐',
     'tool.chat': '对话',

@@ -2,8 +2,8 @@ import { AlertCircle, KeyRound, Lock, RefreshCw, User, X } from 'lucide-react';
 import React, { useEffect, useState } from 'react';
 
 import { useLanguage } from '@/context/LanguageContext';
-import { CaptchaResponse, LoginForm } from '@/types/auth.ts';
-import { BusinessError } from '@/types/http.ts';
+import { CaptchaResponse, LoginForm } from '@/types/auth';
+import { BusinessError } from '@/types/http';
 
 import { ToonButton } from './ToonButton';
 
@@ -40,7 +40,7 @@ export const LoginModal: React.FC<LoginModalProps> = ({
       setCaptchaCode('');
       setError('');
     } catch {
-      setError(t('auth.error_captcha_load'));
+      setError(t('login.error_captcha_load'));
     } finally {
       setIsRefreshingCaptcha(false);
     }
@@ -60,12 +60,12 @@ export const LoginModal: React.FC<LoginModalProps> = ({
     setError('');
 
     if (!username.trim() || !password.trim()) {
-      setError(t('auth.error_fields'));
+      setError(t('login.error_fields'));
       return;
     }
 
     if (!captchaCode.trim()) {
-      setError(t('auth.error_captcha_required'));
+      setError(t('login.error_captcha_required'));
       return;
     }
 
@@ -87,7 +87,7 @@ export const LoginModal: React.FC<LoginModalProps> = ({
         if (error.code === 11001) {
           setError(t('login.account_failed'));
         } else if (error.code === 11002) {
-          setError(t('auth.error_captcha_invalid'));
+          setError(t('login.error_captcha_invalid'));
         } else {
           setError(error.message);
         }
@@ -176,7 +176,7 @@ export const LoginModal: React.FC<LoginModalProps> = ({
                 value={captchaCode}
                 onChange={(e) => setCaptchaCode(e.target.value.toUpperCase())}
                 className="flex-1 border-3 border-black rounded-lg p-2.5 sm:p-3 font-bold text-sm sm:text-base focus:outline-none focus:border-toon-green focus:shadow-toon-lg transition-all disabled:bg-gray-100 disabled:cursor-not-allowed bg-white text-gray-900 uppercase"
-                placeholder={t('auth.captcha')}
+                placeholder={t('login.captcha')}
                 disabled={isLoading}
                 maxLength={4}
               />
