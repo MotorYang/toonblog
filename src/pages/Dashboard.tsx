@@ -1,16 +1,17 @@
 import { Eye, FileText, Flame, Lock, TrendingUp, Trophy } from 'lucide-react';
-import React, { useEffect, useMemo } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 
 import { ToonCard } from '@/components/ToonCard';
-import { useBlogStore } from '@/context/BlogContext';
 import { useLanguage } from '@/context/LanguageContext';
-import { userAuthStore } from '@/stores/userAuthStore.ts';
+import { dashboardService } from '@/services/dashboardService';
+import { userAuthStore } from '@/stores/userAuthStore';
+import { DashboardInfo } from '@/types/dashboard';
 
 export const Dashboard: React.FC = () => {
-  const { posts } = useBlogStore();
   const { isAdmin } = userAuthStore();
   const { t } = useLanguage();
+  const [dashboard, setDashboard] = useState<DashboardInfo | null>(null); // ✅ 改为 null 初始值
   const navigate = useNavigate();
 
   // Protect route
@@ -21,33 +22,49 @@ export const Dashboard: React.FC = () => {
     }
   }, [isAdmin, navigate]);
 
+  useEffect(() => {
+    const fetchInfo = async () => {
+      try {
+        const data = await dashboardService.info();
+        setDashboard(data);
+      } catch (error) {
+        console.error('Failed to fetch dashboard info:', error);
+      }
+    };
+
+    if (isAdmin) {
+      // ✅ 只在是管理员时才请求
+      fetchInfo();
+    }
+  }, [isAdmin]);
+
+  // ✅ 使用 useMemo 计算统计数据
   const stats = useMemo(() => {
-    const totalPosts = posts.length;
-    const totalViews = posts.reduce((acc, post) => acc + (post.views || 0), 0);
+    if (!dashboard) {
+      return {
+        sortedMonths: [],
+        monthlyGrowth: {},
+        topPosts: [],
+      };
+    }
 
-    // Category Stats
-    const categoryCounts: Record<string, number> = {};
-    posts.forEach((post) => {
-      categoryCounts[post.category] = (categoryCounts[post.category] || 0) + 1;
-    });
-
-    // Monthly Growth (Posts per month)
+    // 处理月度数据
     const monthlyGrowth: Record<string, number> = {};
-    posts.forEach((post) => {
-      const month = post.date.substring(0, 7); // YYYY-MM
-      monthlyGrowth[month] = (monthlyGrowth[month] || 0) + 1;
+    dashboard.monthlyGrowth?.forEach((item) => {
+      monthlyGrowth[item.month] = item.count;
     });
 
-    // Sort months
     const sortedMonths = Object.keys(monthlyGrowth).sort();
 
-    // Top 10 Posts
-    const topPosts = [...posts].sort((a, b) => (b.views || 0) - (a.views || 0)).slice(0, 10);
+    return {
+      sortedMonths,
+      monthlyGrowth,
+      topPosts: dashboard.hotArticles || [],
+    };
+  }, [dashboard]);
 
-    return { totalPosts, totalViews, categoryCounts, monthlyGrowth, sortedMonths, topPosts };
-  }, [posts]);
-
-  if (!isAdmin)
+  // ✅ 加载状态
+  if (!isAdmin) {
     return (
       <div className="flex flex-col items-center justify-center min-h-[50vh] text-center animate-in fade-in scale-in duration-500">
         <div className="bg-toon-red/20 p-8 border-4 border-black rounded-2xl shadow-toon-lg">
@@ -57,15 +74,28 @@ export const Dashboard: React.FC = () => {
         </div>
       </div>
     );
+  }
+
+  // ✅ 添加加载状态
+  if (!dashboard) {
+    return (
+      <div className="flex items-center justify-center min-h-[50vh]">
+        <div className="text-center">
+          <div className="inline-block animate-spin rounded-full h-12 w-12 border-4 border-gray-300 border-t-toon-blue mb-4"></div>
+          <p className="font-bold text-gray-600">加载中...</p>
+        </div>
+      </div>
+    );
+  }
 
   const getRankStyle = (index: number) => {
     switch (index) {
       case 0:
-        return 'bg-gradient-to-br from-yellow-400 to-yellow-500 text-black border-yellow-600 shadow-toon'; // Gold
+        return 'bg-gradient-to-br from-yellow-400 to-yellow-500 text-black border-yellow-600 shadow-toon';
       case 1:
-        return 'bg-gradient-to-br from-gray-300 to-gray-400 text-black border-gray-500 shadow-toon-sm'; // Silver
+        return 'bg-gradient-to-br from-gray-300 to-gray-400 text-black border-gray-500 shadow-toon-sm';
       case 2:
-        return 'bg-gradient-to-br from-orange-300 to-orange-400 text-black border-orange-600 shadow-toon-sm'; // Bronze
+        return 'bg-gradient-to-br from-orange-300 to-orange-400 text-black border-orange-600 shadow-toon-sm';
       default:
         return 'bg-white text-gray-600 border-gray-300';
     }
@@ -84,13 +114,13 @@ export const Dashboard: React.FC = () => {
 
   return (
     <div className="space-y-6 md:space-y-8 pb-12">
-      {/* Header - 优化标题区域 */}
+      {/* Header */}
       <div className="text-center mb-6 animate-in fade-in slide-in-from-top-4 duration-500">
         <h1 className="text-3xl md:text-5xl font-black mb-2 text-gray-900">{t('dash.title')}</h1>
         <p className="text-sm md:text-base font-bold text-gray-600">{t('dash.subtitle')}</p>
       </div>
 
-      {/* Top Stats Cards - 增强卡片设计 */}
+      {/* Top Stats Cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
         <div className="animate-in fade-in slide-in-from-left-4 duration-500">
           <ToonCard
@@ -102,7 +132,7 @@ export const Dashboard: React.FC = () => {
                 {t('dash.total_posts')}
               </p>
               <p className="text-4xl md:text-6xl font-black group-hover:scale-105 transition-transform inline-block">
-                {stats.totalPosts}
+                {dashboard.totalArticles || 0}
               </p>
               <p className="text-xs font-bold text-gray-600 mt-1">篇文章</p>
             </div>
@@ -125,7 +155,7 @@ export const Dashboard: React.FC = () => {
                 {t('dash.total_views')}
               </p>
               <p className="text-4xl md:text-6xl font-black group-hover:scale-105 transition-transform inline-block">
-                {stats.totalViews.toLocaleString()}
+                {dashboard.totalViews?.toLocaleString() || 0}
               </p>
               <p className="text-xs font-bold text-gray-600 mt-1">总浏览量</p>
             </div>
@@ -138,7 +168,7 @@ export const Dashboard: React.FC = () => {
 
       {/* Charts Section */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
-        {/* Category Distribution - 优化图表 */}
+        {/* Category Distribution */}
         <div
           className="animate-in fade-in slide-in-from-bottom-4 duration-500"
           style={{ animationDelay: '200ms' }}
@@ -149,7 +179,7 @@ export const Dashboard: React.FC = () => {
               <h3 className="text-xl md:text-2xl font-black">{t('dash.by_category')}</h3>
             </div>
             <div className="space-y-4 flex-grow">
-              {Object.entries(stats.categoryCounts).map(([cat, count], index) => (
+              {Object.entries(dashboard.categoryCounts || {}).map(([cat, count], index) => (
                 <div key={cat} className="space-y-2 group">
                   <div className="flex justify-between font-bold text-sm">
                     <span className="flex items-center gap-2">
@@ -165,10 +195,15 @@ export const Dashboard: React.FC = () => {
                   <div className="w-full bg-gray-100 border-3 border-black rounded-full h-8 overflow-hidden relative group-hover:shadow-toon-sm transition-shadow">
                     <div
                       className={`h-full ${getCategoryColor(index)} border-r-3 border-black transition-all duration-500 flex items-center justify-end pr-2`}
-                      style={{ width: `${(count / stats.totalPosts) * 100}%` }}
+                      style={{
+                        width: `${dashboard.totalArticles > 0 ? (count / dashboard.totalArticles) * 100 : 0}%`,
+                      }}
                     >
                       <span className="text-xs font-black text-white drop-shadow-[1px_1px_0px_rgba(0,0,0,0.5)]">
-                        {Math.round((count / stats.totalPosts) * 100)}%
+                        {dashboard.totalArticles > 0
+                          ? Math.round((count / dashboard.totalArticles) * 100)
+                          : 0}
+                        %
                       </span>
                     </div>
                   </div>
@@ -178,13 +213,13 @@ export const Dashboard: React.FC = () => {
           </ToonCard>
         </div>
 
-        {/* Monthly Growth - 优化图表 */}
+        {/* Monthly Growth - 修复X轴贴底 */}
         <div
           className="animate-in fade-in slide-in-from-bottom-4 duration-500"
           style={{ animationDelay: '300ms' }}
         >
           <ToonCard className="flex flex-col h-full">
-            <div className="flex items-center justify-between mb-4 md:mb-6">
+            <div className="flex items-center justify-between mb-4">
               <div className="flex items-center gap-2">
                 <div className="bg-toon-red p-2 border-2 border-black rounded-lg">
                   <TrendingUp size={20} className="text-white" />
@@ -201,9 +236,10 @@ export const Dashboard: React.FC = () => {
               </div>
             </div>
 
-            <div className="relative">
+            {/* 图表区域 */}
+            <div className="relative flex-1 min-h-[280px] md:min-h-[320px] mb-3">
               {/* Y轴参考线 */}
-              <div className="absolute left-0 right-0 h-48 md:h-56 flex flex-col justify-between pointer-events-none">
+              <div className="absolute left-0 right-0 top-0 bottom-8 flex flex-col justify-between pointer-events-none">
                 {(() => {
                   const maxCount = Math.max(...Object.values(stats.monthlyGrowth), 1);
                   const step = Math.ceil(maxCount / 4);
@@ -221,45 +257,58 @@ export const Dashboard: React.FC = () => {
                 })()}
               </div>
 
-              {/* 柱状图 */}
-              <div className="flex items-end gap-2 md:gap-3 h-48 md:h-56 border-b-4 border-black pl-10 pr-2 overflow-x-auto">
-                {stats.sortedMonths.map((month, index) => {
-                  const count = stats.monthlyGrowth[month];
-                  const maxCount = Math.max(...Object.values(stats.monthlyGrowth));
-                  const heightPercentage = (count / maxCount) * 100;
-                  const displayDate = month.slice(2);
-                  const isLatest = index === stats.sortedMonths.length - 1;
+              {/* 柱状图容器 - 关键修改：bottom-8 对齐月份标签空间 */}
+              <div className="absolute left-10 right-2 top-0 bottom-8">
+                <div className="h-full flex items-end gap-2 md:gap-3 border-b-4 border-black overflow-x-auto pb-0">
+                  {stats.sortedMonths.map((month, index) => {
+                    const count = stats.monthlyGrowth[month];
+                    const maxCount = Math.max(...Object.values(stats.monthlyGrowth));
+                    const heightPercentage = maxCount > 0 ? (count / maxCount) * 100 : 0;
+                    const isLatest = index === stats.sortedMonths.length - 1;
 
-                  return (
-                    <div
-                      key={month}
-                      className="flex flex-col items-center min-w-[3rem] flex-1 group animate-in fade-in slide-in-from-bottom-2 duration-500 relative h-full justify-end pb-8"
-                      style={{ animationDelay: `${index * 50}ms` }}
-                    >
-                      {/* 悬浮提示 */}
-                      <div className="absolute -top-16 left-1/2 -translate-x-1/2 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-10">
-                        <div className="bg-gray-900 text-white px-3 py-2 rounded-lg border-2 border-black shadow-toon-lg whitespace-nowrap">
-                          <p className="font-black text-sm">{month}</p>
-                          <p className="text-xs font-bold opacity-80">{count} 篇文章</p>
-                        </div>
-                        <div className="w-0 h-0 border-l-4 border-r-4 border-t-4 border-transparent border-t-gray-900 mx-auto"></div>
-                      </div>
-
-                      {/* 数值标签 */}
+                    return (
                       <div
-                        className={`font-black text-xs ${isLatest ? 'bg-toon-red text-white' : 'bg-white text-black'} border-2 border-black rounded-full w-7 h-7 flex items-center justify-center shadow-toon-sm group-hover:scale-110 transition-transform mb-1`}
+                        key={month}
+                        className="flex flex-col items-center flex-1 min-w-[3rem] group animate-in fade-in slide-in-from-bottom-2 duration-500 relative h-full justify-end"
+                        style={{ animationDelay: `${index * 50}ms` }}
                       >
-                        {count}
+                        {/* 悬浮提示 */}
+                        <div className="absolute -top-16 left-1/2 -translate-x-1/2 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-10">
+                          <div className="bg-gray-900 text-white px-3 py-2 rounded-lg border-2 border-black shadow-toon-lg whitespace-nowrap">
+                            <p className="font-black text-sm">{month}</p>
+                            <p className="text-xs font-bold opacity-80">{count} 篇文章</p>
+                          </div>
+                          <div className="w-0 h-0 border-l-4 border-r-4 border-t-4 border-transparent border-t-gray-900 mx-auto"></div>
+                        </div>
+
+                        {/* 数值标签 */}
+                        <div
+                          className={`font-black text-xs ${isLatest ? 'bg-toon-red text-white' : 'bg-white text-black'} border-2 border-black rounded-full w-7 h-7 flex items-center justify-center shadow-toon-sm group-hover:scale-110 transition-transform mb-1 relative z-10`}
+                        >
+                          {count}
+                        </div>
+
+                        {/* 柱子 */}
+                        <div
+                          className={`w-full ${isLatest ? 'bg-gradient-to-t from-toon-red to-red-400' : 'bg-gradient-to-t from-gray-400 to-gray-300'} border-3 border-black rounded-t-xl shadow-toon-sm transition-all duration-500`}
+                          style={{
+                            height: `${heightPercentage}%`,
+                            minHeight: count > 0 ? '30px' : '10px',
+                          }}
+                        ></div>
                       </div>
+                    );
+                  })}
+                </div>
+              </div>
 
-                      {/* 柱子 */}
-                      <div
-                        className={`w-full ${isLatest ? 'bg-gradient-to-t from-toon-red to-red-400' : 'bg-gradient-to-t from-gray-400 to-gray-300'} border-3 border-black rounded-t-xl shadow-toon-sm`}
-                        style={{ height: `${heightPercentage}%`, minHeight: '20px' }}
-                      ></div>
-
-                      {/* 月份标签 */}
-                      <span className="font-bold text-[10px] text-gray-600 absolute bottom-0">
+              {/* 月份标签 - 移到底部固定位置 */}
+              <div className="absolute left-10 right-2 bottom-0 flex gap-2 md:gap-3">
+                {stats.sortedMonths.map((month) => {
+                  const displayDate = month.slice(2);
+                  return (
+                    <div key={month} className="flex-1 min-w-[3rem] text-center">
+                      <span className="font-bold text-[10px] text-gray-600 inline-block">
                         {displayDate}
                       </span>
                     </div>
@@ -268,7 +317,8 @@ export const Dashboard: React.FC = () => {
               </div>
             </div>
 
-            <div className="flex items-center justify-between mt-4 pt-3 border-t-2 border-dashed border-gray-200">
+            {/* 底部说明 */}
+            <div className="flex items-center justify-between pt-3 border-t-2 border-dashed border-gray-200">
               <p className="font-bold text-gray-500 text-xs">{t('dash.timeline')}</p>
               <div className="flex items-center gap-2 text-xs font-bold text-gray-500">
                 <div className="w-3 h-3 bg-toon-red border-2 border-black rounded"></div>
@@ -279,7 +329,7 @@ export const Dashboard: React.FC = () => {
         </div>
       </div>
 
-      {/* Top 10 Leaderboard - 增强排行榜 */}
+      {/* Top 10 Leaderboard */}
       <div
         className="animate-in fade-in slide-in-from-bottom-4 duration-500"
         style={{ animationDelay: '400ms' }}
