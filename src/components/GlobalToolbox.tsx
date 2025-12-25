@@ -169,11 +169,6 @@ export const GlobalToolbox: React.FC = () => {
   // 聊天会话 ID - 使用 ref 保持会话持久化
   const sessionIdRef = useRef<string>('');
 
-  // 检测是否为移动设备
-  const isMobile = () => {
-    return window.innerWidth < 640; // sm breakpoint
-  };
-
   useEffect(() => {
     audioRef.current = new Audio(PLAYLIST[0].url);
     audioRef.current.addEventListener('ended', handleNextTrack);
@@ -183,13 +178,6 @@ export const GlobalToolbox: React.FC = () => {
       audioRef.current?.removeEventListener('ended', handleNextTrack);
     };
   }, []);
-
-  // 打开时检测是否移动端,自动全屏
-  useEffect(() => {
-    if (isOpen && isMobile()) {
-      setIsFullscreen(true);
-    }
-  }, [isOpen]);
 
   // Update Audio source when track changes
   useEffect(() => {
@@ -675,7 +663,7 @@ export const GlobalToolbox: React.FC = () => {
       {!isOpen && (
         <button
           onClick={() => setIsOpen(true)}
-          className="group relative flex items-center justify-center w-14 h-14 sm:w-16 sm:h-16 bg-gradient-to-br from-toon-purple to-purple-600 text-white border-4 border-black rounded-full shadow-toon hover:shadow-toon-lg hover:scale-110 active:scale-95 transition-all duration-300"
+          className="group relative flex items-center justify-center w-14 h-14 sm:w-16 sm:h-16 bg-toon-purple from-toon-purple  text-white border-4 border-black rounded-full shadow-toon hover:shadow-toon-lg hover:scale-110 active:scale-95 transition-all duration-300"
           aria-label="Open toolbox"
         >
           <Settings
