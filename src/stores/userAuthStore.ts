@@ -19,6 +19,7 @@ interface AuthState {
   refreshToken: string | null;
   isAdmin: boolean;
   isLoading: boolean;
+  isRefreshing: boolean; // ✅ 新增：是否正在刷新token
   tokenExpiresAt: number | null;
   refreshTimerId: NodeJS.Timeout | null;
 
@@ -28,13 +29,17 @@ interface AuthState {
   login: (loginForm: LoginForm) => Promise<void>;
   logout: () => Promise<void>;
   setUser: (userLoginResponse: UserLoginResponse | null) => void;
-  refreshAccessToken: () => Promise<void>;
+  setTokens: (tokens: { accessToken: string; refreshToken: string }) => void; // ✅ 新增
+  refreshAccessToken: () => Promise<string>; // ✅ 修改返回类型
   checkAndRefreshToken: () => Promise<boolean>;
   scheduleTokenRefresh: () => void;
 }
 
 // Token 过期前提前刷新的时间(5分钟)
 const TOKEN_REFRESH_THRESHOLD = 5 * 60 * 1000;
+
+// ✅ 请求队列：用于在刷新token期间暂存失败的请求
+let refreshPromise: Promise<string> | null = null;
 
 export const userAuthStore = create<AuthState>()(
   persist(
@@ -44,6 +49,7 @@ export const userAuthStore = create<AuthState>()(
       refreshToken: null,
       isAdmin: false,
       isLoading: false,
+      isRefreshing: false, // ✅ 初始化
       tokenExpiresAt: null,
       refreshTimerId: null,
 
@@ -59,7 +65,7 @@ export const userAuthStore = create<AuthState>()(
       },
 
       captcha: async (): Promise<CaptchaResponse> => {
-        return await userService.captcha();
+        return await userService.getCaptcha();
       },
 
       login: async (loginForm: LoginForm) => {
@@ -103,10 +109,13 @@ export const userAuthStore = create<AuthState>()(
         } catch (error) {
           console.error('Logout failed:', error);
         } finally {
-          // 🔧 修复: 先检查是否为 null 再清除定时器
+          // 清除定时器
           if (refreshTimerId !== null) {
             clearTimeout(refreshTimerId);
           }
+
+          // ✅ 清除刷新Promise
+          refreshPromise = null;
 
           // 清理所有认证状态
           set({
@@ -114,6 +123,7 @@ export const userAuthStore = create<AuthState>()(
             accessToken: null,
             refreshToken: null,
             isAdmin: false,
+            isRefreshing: false,
             tokenExpiresAt: null,
             refreshTimerId: null,
           });
@@ -128,44 +138,77 @@ export const userAuthStore = create<AuthState>()(
         set({ user, isAdmin });
       },
 
-      refreshAccessToken: async () => {
-        const { refreshToken, isLoading } = get();
+      // 更新tokens的方法
+      setTokens: (tokens: { accessToken: string; refreshToken: string }) => {
+        // 计算新的过期时间（这里假设24小时，实际应该从后端返回）
+        const expiresAt = Date.now() + 24 * 60 * 60 * 1000;
 
-        // 防止重复刷新
-        if (isLoading || !refreshToken) {
-          return;
+        set({
+          accessToken: tokens.accessToken,
+          refreshToken: tokens.refreshToken,
+          tokenExpiresAt: expiresAt,
+        });
+
+        // 重新安排下次刷新
+        get().scheduleTokenRefresh();
+      },
+
+      // 返回新的accessToken，支持防重复刷新
+      refreshAccessToken: async (): Promise<string> => {
+        const { refreshToken, isRefreshing } = get();
+
+        // 如果正在刷新，返回现有的Promise
+        if (isRefreshing && refreshPromise) {
+          return refreshPromise;
         }
 
-        set({ isLoading: true });
-        try {
-          const result: TokenRefreshResponse = await userService.refreshToken();
-
-          // 计算新的过期时间
-          const expiresAt = result.expiresIn
-            ? Date.now() + result.expiresIn * 1000
-            : Date.now() + 24 * 60 * 60 * 1000;
-
-          set({
-            accessToken: result.accessToken,
-            refreshToken: result.refreshToken || refreshToken,
-            tokenExpiresAt: expiresAt,
-          });
-
-          // 重新安排下次刷新
-          get().scheduleTokenRefresh();
-
-          console.log('Token refreshed successfully');
-        } catch (error) {
-          console.error('Token refresh failed:', error);
-
-          // Token 刷新失败,清理状态并提示用户重新登录
-          Tip.error(translate('auth.session.expired'));
-          await get().logout();
-
-          throw error;
-        } finally {
-          set({ isLoading: false });
+        // 没有refreshToken，直接失败
+        if (!refreshToken) {
+          throw new Error('No refresh token available');
         }
+
+        // 标记正在刷新
+        set({ isRefreshing: true });
+
+        // 创建刷新Promise
+        refreshPromise = (async () => {
+          try {
+            const result: TokenRefreshResponse = await userService.refreshToken();
+
+            // 计算新的过期时间
+            const expiresAt = result.expiresIn
+              ? Date.now() + result.expiresIn * 1000
+              : Date.now() + 24 * 60 * 60 * 1000;
+
+            set({
+              accessToken: result.accessToken,
+              refreshToken: result.refreshToken || refreshToken,
+              tokenExpiresAt: expiresAt,
+            });
+
+            // 重新安排下次刷新
+            get().scheduleTokenRefresh();
+
+            console.log('Token refreshed successfully');
+
+            // 返回新的accessToken
+            return result.accessToken;
+          } catch (error) {
+            console.error('Token refresh failed:', error);
+
+            // Token 刷新失败,清理状态并提示用户重新登录
+            Tip.error(translate('auth.session.expired'));
+            await get().logout();
+
+            throw error;
+          } finally {
+            // 刷新完成，重置状态
+            set({ isRefreshing: false });
+            refreshPromise = null;
+          }
+        })();
+
+        return refreshPromise;
       },
 
       checkAndRefreshToken: async () => {
@@ -211,13 +254,13 @@ export const userAuthStore = create<AuthState>()(
 
         if (timeUntilRefresh > 0) {
           const timerId = setTimeout(() => {
-            get().refreshAccessToken().then();
+            get().refreshAccessToken().catch(console.error);
           }, timeUntilRefresh);
 
           set({ refreshTimerId: timerId });
         } else {
           // 如果已经在刷新阈值内,立即刷新
-          get().refreshAccessToken().then();
+          get().refreshAccessToken().catch(console.error);
         }
       },
     }),
