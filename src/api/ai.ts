@@ -11,13 +11,13 @@ import http from '@/utils/request/http';
 
 export const AiApi = {
   generateSummary: async (payload: GenerateSummaryRequest): Promise<SummaryResponse> =>
-    await http.post(`/cartoon/ai/generate-summary`, payload),
+    await http.post(`/blog/ai/generate-summary`, payload),
 
   generateBlogContent: async (payload: GenerateContent): Promise<GenerateContentResponse> =>
-    await http.post(`/cartoon/ai/generate-blog`, payload),
+    await http.post(`/blog/ai/generate-blog`, payload),
 
   chat: async (chatRequest: ChatRequest): Promise<ChatResponse> =>
-    await http.post(`/cartoon/ai/chat`, chatRequest),
+    await http.post(`/blog/ai/chat`, chatRequest),
 
-  healthCheck: async (): Promise<HealthCheckResponse> => await http.get(`/cartoon/ai/health`),
+  healthCheck: async (): Promise<HealthCheckResponse> => await http.get(`/blog/ai/health`),
 };

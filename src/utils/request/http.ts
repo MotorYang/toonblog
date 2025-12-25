@@ -7,9 +7,9 @@ import axios, {
 } from 'axios';
 
 import { Tip } from '@/components/GlobalTip';
-import { translate } from '@/context/LanguageContext';
 import { userAuthStore } from '@/stores/userAuthStore';
 import { BusinessError, HttpClient, HttpResponse, SuccessResponse } from '@/types/http';
+import { mapHttpError } from '@/utils/request/error.ts';
 
 let navigateToLogin: (() => void) | null = null;
 
@@ -32,9 +32,9 @@ function isSuccessResponse<T>(response: HttpResponse<T>): response is SuccessRes
 // 请求拦截器
 axiosInstance.interceptors.request.use(
   (config: InternalAxiosRequestConfig) => {
-    const { token } = userAuthStore.getState();
-    if (token && config.headers) {
-      config.headers.Authorization = `Bearer ${token}`;
+    const { accessToken } = userAuthStore.getState();
+    if (accessToken && config.headers) {
+      config.headers.Authorization = `Bearer ${accessToken}`;
     }
     return config;
   },
@@ -51,24 +51,42 @@ axiosInstance.interceptors.response.use(
     if (isSuccessResponse(res)) {
       return response;
     }
-    Tip.error(translate('http.api.error') + ':' + res.msg);
+    Tip.error(res.msg);
     return Promise.reject(new BusinessError(res.code, res.msg, res.timestamp));
   },
   async (error: AxiosError<HttpResponse>) => {
-    console.error('这是一个错误:', error);
-    if (error.response?.status === 401) {
-      // Token 过期处理
-      Tip.error(translate('auth.token.expired'));
-      await userAuthStore.getState().logout();
-      if (navigateToLogin) {
-        navigateToLogin();
-      } else {
-        window.location.href = '/';
+    const originalRequest = error.config as InternalAxiosRequestConfig & { _retry?: boolean };
+
+    // 401 错误处理 - 使用 store 中的 refreshAccessToken
+    if (error.response?.status === 401 && originalRequest && !originalRequest._retry) {
+      // 标记请求已重试，防止无限循环
+      originalRequest._retry = true;
+
+      try {
+        // 调用 store 的刷新方法（内置防重复逻辑）
+        const newAccessToken = await userAuthStore.getState().refreshAccessToken();
+
+        // 用新 token 重试原请求
+        if (originalRequest.headers) {
+          originalRequest.headers.Authorization = `Bearer ${newAccessToken}`;
+        }
+
+        return axiosInstance(originalRequest);
+      } catch (refreshError) {
+        // 刷新失败，跳转登录页
+        // 注意：logout 已经在 store 中处理了，这里只需跳转
+        if (navigateToLogin) {
+          navigateToLogin();
+        } else {
+          window.location.href = '/';
+        }
+
+        return Promise.reject(refreshError);
       }
-      return Promise.reject(error);
     }
 
-    const errorMsg = error.message || translate('common.error.network');
+    // 其他错误处理
+    const errorMsg = mapHttpError(error);
     Tip.error(errorMsg);
     return Promise.reject(error);
   },

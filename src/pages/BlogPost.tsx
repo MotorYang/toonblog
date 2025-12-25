@@ -63,6 +63,10 @@ export const BlogPost: React.FC = () => {
   const hasViewed = useRef(false);
 
   useEffect(() => {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }, []);
+
+  useEffect(() => {
     if (post && !hasViewed.current) {
       incrementViews(post.id);
       markAsRead(post.id); // 标记为已读

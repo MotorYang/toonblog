@@ -1,3 +1,5 @@
+import { PaginationParams } from '@/types/query.ts';
+
 export interface Article {
   id: string;
   title: string;
@@ -13,6 +15,12 @@ export interface Article {
 
 export type ArticleCreateDTO = Omit<Article, 'id' | 'views'>;
 
+export interface ArticleFilter {
+  title?: string;
+  category?: string;
+  sortOrder?: string;
+}
+
 export interface BlogContextType {
   posts: Article[];
   isLoading: boolean;
@@ -23,4 +31,13 @@ export interface BlogContextType {
   incrementViews: (id: string) => Promise<void>;
   refreshPosts: () => Promise<void>;
   refreshOnePost: (id: string) => Promise<void>;
+
+  // 分页和筛选
+  pagination: PaginationParams;
+  filters: ArticleFilter;
+  updatePage: (page: number) => void;
+  updatePageSize: (size: number) => void;
+  updateFilters: (newFilters: Partial<ArticleFilter>) => void;
+  resetFilters: () => void;
+  refreshCurrentPage: () => Promise<void>;
 }

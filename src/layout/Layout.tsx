@@ -1,5 +1,19 @@
-import { BarChart3, Ghost, Home, LogIn, LogOut, Menu, PenTool, Settings, X } from 'lucide-react';
-import React, { useState } from 'react';
+import {
+  BarChart3,
+  Ghost,
+  Github,
+  Home,
+  LogIn,
+  LogOut,
+  Menu,
+  Package,
+  PenTool,
+  Pickaxe,
+  Settings,
+  X,
+  Zap,
+} from 'lucide-react';
+import React, { useEffect, useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 
 import { useLanguage } from '@/context/LanguageContext.tsx';
@@ -15,11 +29,15 @@ import { ThemeSelector } from '../components/ThemeSelector.tsx';
 export const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const navigate = useNavigate();
   const location = useLocation();
-  const { user, isAdmin, login, logout } = userAuthStore();
+  const { user, isAdmin, login, logout, captcha } = userAuthStore();
   const { t } = useLanguage();
   const [isLoginOpen, setIsLoginOpen] = useState(false);
   const [isLogoutConfirmOpen, setIsLogoutConfirmOpen] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+
+  // Performance metrics state
+  const [pageSize, setPageSize] = useState<number>(0);
+  const [loadTime, setLoadTime] = useState<number>(0);
 
   const isActive = (path: string) => {
     if (location.pathname.startsWith('/post/')) return '/' === path;
@@ -47,6 +65,42 @@ export const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) =>
   const closeMobileMenu = () => {
     setIsMobileMenuOpen(false);
   };
+
+  // Calculate performance metrics
+  useEffect(() => {
+    // Calculate page size
+    const calculatePageSize = () => {
+      const resources = performance.getEntriesByType('resource') as PerformanceResourceTiming[];
+      const totalSize = resources.reduce((acc, resource) => {
+        return acc + (resource.transferSize || 0);
+      }, 0);
+      setPageSize(Math.round(totalSize / 1024)); // Convert to KB
+    };
+
+    // Calculate load time
+    const calculateLoadTime = () => {
+      const navigation = performance.getEntriesByType(
+        'navigation',
+      )[0] as PerformanceNavigationTiming;
+      if (navigation) {
+        const loadTime = navigation.loadEventEnd - navigation.fetchStart;
+        setLoadTime(Math.round(loadTime));
+      }
+    };
+
+    // Run after page load
+    if (document.readyState === 'complete') {
+      calculatePageSize();
+      calculateLoadTime();
+    } else {
+      window.addEventListener('load', () => {
+        setTimeout(() => {
+          calculatePageSize();
+          calculateLoadTime();
+        }, 100);
+      });
+    }
+  }, [location.pathname]);
 
   return (
     <div className="min-h-screen flex flex-col font-sans transition-colors duration-300">
@@ -121,7 +175,7 @@ export const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) =>
                   title={t('nav.logout')}
                 >
                   <LogOut className="w-4 h-4" />
-                  <span>{user.name}</span>
+                  <span>{user.nickName}</span>
                 </button>
               ) : (
                 <button
@@ -222,7 +276,7 @@ export const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) =>
                     className="w-full flex items-center gap-3 p-3 border-2 border-black rounded-lg bg-gray-100 hover:bg-red-100 transition-colors font-bold text-sm text-gray-900"
                   >
                     <LogOut className="w-5 h-5" />
-                    <span>{user.name}</span>
+                    <span>{user.nickName}</span>
                   </button>
                 ) : (
                   <button
@@ -248,13 +302,60 @@ export const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) =>
         </div>
       </main>
 
-      <footer className="mt-6 md:mt-8 p-3 md:p-6 text-center relative text-gray-900 mb-20 sm:mb-4">
-        <div className="inline-block bg-white border-2 md:border-4 border-black rounded-full px-4 md:px-6 py-2 text-sm md:text-base font-bold shadow-toon">
-          © {new Date().getFullYear()} ToonBlog • Built with MotorYang
+      <footer className="p-3 md:p-4 text-center relative text-gray-900 mb-20 sm:mb-4">
+        <div className="max-w-4xl mx-auto">
+          {/* Main Footer Card */}
+          <div className="inline-block bg-white border-2 md:border-3 border-black rounded-xl md:rounded-2xl overflow-hidden">
+            {/* Top Section - GitHub & Copyright */}
+            <div className="px-4 md:px-6 py-3 bg-gradient-to-r from-toon-purple to-toon-blue border-b-2 border-black">
+              <div className="flex flex-col sm:flex-row items-center justify-center gap-2 sm:gap-4">
+                <a
+                  href="https://github.com/motoryang/toonblog"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-center gap-2 px-3 py-1.5 bg-black text-white border-2 border-black rounded-lg hover:bg-gray-800 transition-all hover:scale-105 font-bold text-xs md:text-sm group"
+                >
+                  <Github className="w-4 h-4 group-hover:rotate-12 transition-transform" />
+                  <span>ToonBlog</span>
+                </a>
+                <div className="hidden sm:block w-[2px] h-4 bg-black/30"></div>
+                <span className="font-black text-xs md:text-sm text-white">
+                  © {new Date().getFullYear()} Built with MotorYang
+                </span>
+              </div>
+            </div>
+
+            {/* Bottom Section - Performance Metrics */}
+            <div className="px-3 md:px-4 py-2 bg-gray-50">
+              <div className="flex flex-wrap items-center justify-center gap-2 md:gap-4 text-xs">
+                {/* Builders */}
+                <div className="flex items-center gap-1.5 px-2 py-1 bg-toon-purple border-2 border-black rounded-lg">
+                  <Pickaxe className="w-3.5 h-3.5" />
+                  <span className="font-bold">React + Vite</span>
+                </div>
+                {/* Page Size */}
+                <div className="flex items-center gap-1.5 px-2 py-1 bg-toon-yellow border-2 border-black rounded-lg">
+                  <Package className="w-3.5 h-3.5" />
+                  <span className="font-bold">{pageSize}KB</span>
+                </div>
+
+                {/* Load Time */}
+                <div className="flex items-center gap-1.5 px-2 py-1 bg-toon-blue border-2 border-black rounded-lg">
+                  <Zap className="w-3.5 h-3.5" />
+                  <span className="font-bold">{loadTime}ms</span>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
       </footer>
 
-      <LoginModal isOpen={isLoginOpen} onClose={() => setIsLoginOpen(false)} onLogin={login} />
+      <LoginModal
+        isOpen={isLoginOpen}
+        onClose={() => setIsLoginOpen(false)}
+        onLogin={login}
+        onGetCaptcha={captcha}
+      />
 
       <ConfirmDialog
         isOpen={isLogoutConfirmOpen}
