@@ -125,6 +125,7 @@ export const translations = {
     'settings.category.title': 'Article Classification Configuration',
     'settings.category.noAdded': 'No Classification added yet.',
     'settings.category.add': 'Add Article Classification',
+    'settings.category.code': 'Code',
     'settings.category.chinese': 'Article Classification (Chinese)',
     'settings.category.english': 'Article Classification (English)',
     'settings.category.remark': 'Article Classification Remark',
@@ -135,6 +136,7 @@ export const translations = {
     'settings.music.name': 'Name',
     'settings.music.author': 'Author',
     'settings.music.url': 'Audio Url',
+    'settings.saved': 'Save Successfully',
     // Login
     'login.title': 'Who Goes There?',
     'login.username': 'Username',
@@ -283,6 +285,7 @@ export const translations = {
     'settings.category.title': '文章分类配置',
     'settings.category.noAdded': '没有配置文章分类',
     'settings.category.add': '添加分类',
+    'settings.category.code': '分类编码',
     'settings.category.chinese': '文章分类 (中文)',
     'settings.category.english': '文章分类 (英文)',
     'settings.category.remark': '文章分类说明',
@@ -293,6 +296,7 @@ export const translations = {
     'settings.music.name': '名称',
     'settings.music.author': '作者',
     'settings.music.url': '播放链接',
+    'settings.saved': '已保存',
     // Login
     'login.title': '来者何人？',
     'login.username': '用户名',
